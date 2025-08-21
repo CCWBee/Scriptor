@@ -21,39 +21,46 @@
   const btnTable = $('#btnTable');
   const toasts = $('#toasts');
 
-  let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
-  let currentFileName = 'untitled.md';
-
-  // Markdown-it with GFM-like bits
-  const md = window.markdownit({
-    html: false,
-    linkify: true,
-    breaks: false
-  }).enable(['table','strikethrough']);
-
-  // Turndown
-  const td = new TurndownService({
-    headingStyle: 'atx',
-    hr: '---',
-    bulletListMarker: '-',
-    codeBlockStyle: 'fenced',
-    emDelimiter: '_'
-  });
-  turndownPluginGfm.gfm(td); // tables, strikethrough, task lists etc.
-
-  // Rules to keep <s> mapping to ~~
-  td.addRule('sToStrike', {
-    filter: ['s', 'strike'],
-    replacement: (content) => '~~' + content + '~~'
-  });
-
-  // Helpers
   function toast(msg, cls = '') {
     const el = document.createElement('div');
     el.className = 'toast ' + cls;
     el.textContent = msg;
     toasts.appendChild(el);
     setTimeout(() => { el.classList.add('fade'); el.addEventListener('transitionend', () => el.remove(), { once:true }); }, 2400);
+  }
+
+  let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
+  let currentFileName = 'untitled.md';
+  let md, td;
+
+  try {
+    if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm) {
+      throw new Error('Missing required libraries');
+    }
+    md = window.markdownit({
+      html: false,
+      linkify: true,
+      breaks: false
+    }).enable(['table','strikethrough']);
+
+    td = new TurndownService({
+      headingStyle: 'atx',
+      hr: '---',
+      bulletListMarker: '-',
+      codeBlockStyle: 'fenced',
+      emDelimiter: '_'
+    });
+    turndownPluginGfm.gfm(td); // tables, strikethrough, task lists etc.
+
+    td.addRule('sToStrike', {
+      filter: ['s', 'strike'],
+      replacement: (content) => '~~' + content + '~~'
+    });
+  } catch (err) {
+    console.error(err);
+    toast('Required libraries failed to load', 'warn');
+    document.querySelectorAll('.btn').forEach(b => { b.disabled = true; b.setAttribute('aria-disabled','true'); });
+    return;
   }
 
   function normaliseInlineTags(root=editor){
@@ -204,6 +211,7 @@
       const txt = await f.text();
       currentFileName = f.name;
       renderMarkdownToEditor(txt, true);
+      toast('Loaded ' + f.name, 'success');
       if (mode === 'source') toggleSource(false);
     } catch(err) {
       console.error(err);
@@ -231,6 +239,7 @@
       const txt = await f.text();
       currentFileName = f.name;
       renderMarkdownToEditor(txt, true);
+      toast('Loaded ' + f.name, 'success');
       if (mode === 'source') toggleSource(false);
     }catch(err){
       console.error(err);
