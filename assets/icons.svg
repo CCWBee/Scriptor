@@ -9,6 +9,9 @@
   <symbol id="code" viewBox="0 0 24 24">
     <path fill="currentColor" d="M8 16l-4-4 4-4 1.4 1.4L6.8 12l2.6 2.6zM16 8l4 4-4 4-1.4-1.4 2.6-2.6-2.6-2.6z"/>
   </symbol>
+  <symbol id="undo" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 5V2L7 7l5 5V9c3.31 0 6 2.69 6 6 0 .34-.03.67-.07 1h2.02c.03-.33.05-.66.05-1 0-4.97-4.03-9-9-9z"/>
+  </symbol>
   <symbol id="bold" viewBox="0 0 24 24">
     <path fill="currentColor" d="M7 4h6a4 4 0 010 8H7zM7 12h7a4 4 0 010 8H7z"/>
   </symbol>
