@@ -11,6 +11,9 @@
   <header class="ribbon" role="navigation" aria-label="Editor toolbar">
     <nav role="toolbar" aria-label="Formatting">
       <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
+      <button id="btnUndo" class="btn" title="Undo  Ctrl or Cmd+Z" aria-label="Undo">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#undo"/></svg>
+      </button>
       <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg>
       </button>
@@ -49,9 +52,19 @@
         </div>
       </div>
 
-      <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-label="Insert chart">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
-      </button>
+      <div class="chart-wrap">
+        <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
+        </button>
+        <div id="chartBuilder" class="chart-builder" role="dialog" aria-modal="false" aria-label="Insert flowchart">
+          <div class="steps"></div>
+          <button class="add-step" type="button">Add step</button>
+          <div class="actions">
+            <button class="insert" type="button">Insert</button>
+            <button class="close" type="button">Close</button>
+          </div>
+        </div>
+      </div>
 
       <button class="btn" title="Insert image  (stub)" aria-disabled="true" disabled>
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
@@ -85,6 +98,7 @@
     <button id="toggleShortcuts" class="toggle" aria-expanded="true" aria-label="Hide shortcuts">×</button>
     <h2>Shortcuts</h2>
     <ul>
+      <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> Undo</li>
       <li><kbd>Ctrl</kbd> + <kbd>B</kbd> Bold</li>
       <li><kbd>Ctrl</kbd> + <kbd>I</kbd> Italic</li>
       <li><kbd>Ctrl</kbd> + <kbd>E</kbd> Strikethrough</li>

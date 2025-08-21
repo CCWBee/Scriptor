@@ -11,6 +11,7 @@
   const btnLoad = $('#btnLoad');
   const btnExport = $('#btnExport');
   const btnSource = $('#btnSource');
+  const btnUndo = $('#btnUndo');
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
   const btnStrike = $('#btnStrike');
@@ -19,7 +20,13 @@
   const tableGrid = tablePicker.querySelector('.grid');
   const tableHint = $('#tableHint');
   const btnTable = $('#btnTable');
+  const chartWrap = $('.chart-wrap');
   const btnChart = $('#btnChart');
+  const chartBuilder = $('#chartBuilder');
+  const chartSteps = chartBuilder.querySelector('.steps');
+  const chartAddStep = chartBuilder.querySelector('.add-step');
+  const chartInsert = chartBuilder.querySelector('.insert');
+  const chartClose = chartBuilder.querySelector('.close');
   const toasts = $('#toasts');
   const root = document.documentElement;
   const shortcutsPanel = $('#shortcuts');
@@ -36,6 +43,8 @@
   let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
   let currentFileName = 'untitled.md';
   let md, td;
+  let undoStack = [];
+  let lastSnapshot = '';
 
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
@@ -112,6 +121,29 @@
     return null;
   }
 
+  function snapshot() {
+    if (mode !== 'wysiwyg') return;
+    const html = editor.innerHTML;
+    if (html !== lastSnapshot) {
+      undoStack.push(lastSnapshot);
+      lastSnapshot = html;
+    }
+  }
+
+  function undo() {
+    if (mode !== 'wysiwyg') return;
+    const prev = undoStack.pop();
+    if (typeof prev === 'string') {
+      editor.innerHTML = prev;
+      normaliseInlineTags();
+      editor.querySelectorAll('.mermaid').forEach(div => {
+        div.removeAttribute('data-processed');
+        if (window.mermaid) mermaid.init(undefined, div);
+      });
+      lastSnapshot = prev;
+    }
+  }
+
   function applyHeading(level) {
     if (mode !== 'wysiwyg') return;
     const rng = getSelectionRange();
@@ -141,6 +173,7 @@
     nr.selectNodeContents(repl);
     nr.collapse(true);
     sel.addRange(nr);
+    snapshot();
   }
 
   function insertTable(rows, cols) {
@@ -176,17 +209,16 @@
       nr.collapse(true);
       sel.removeAllRanges(); sel.addRange(nr);
     }
+    snapshot();
   }
 
-  function insertMermaidChart(def = 'graph TD\nA-->B') {
-    if (mode !== 'wysiwyg') return;
-    const definition = prompt('Mermaid definition', def);
-    if (!definition) return;
+  function insertMermaidChart(def) {
+    if (mode !== 'wysiwyg' || !def) return;
     const div = document.createElement('div');
     div.className = 'mermaid';
     div.setAttribute('contenteditable', 'false');
-    div.dataset.code = definition;
-    div.textContent = definition;
+    div.dataset.code = def;
+    div.textContent = def;
     const rng = getSelectionRange();
     if (rng) {
       rng.deleteContents();
@@ -196,6 +228,7 @@
     }
     div.removeAttribute('data-processed');
     if (window.mermaid) mermaid.init(undefined, div);
+    snapshot();
   }
 
   function renderMarkdownToEditor(markdown, fromLoad=false) {
@@ -214,6 +247,8 @@
       });
       editor.innerHTML = tmp.innerHTML;
       normaliseInlineTags();
+      undoStack = [];
+      lastSnapshot = editor.innerHTML;
       if (fromLoad) editor.focus();
       editor.querySelectorAll('.mermaid').forEach(div => {
         div.removeAttribute('data-processed');
@@ -316,6 +351,7 @@
     mer.innerHTML = updated;
     mer.removeAttribute('data-processed');
     if (window.mermaid) mermaid.init(undefined, mer);
+    snapshot();
   });
 
   // Advanced toggle
@@ -397,8 +433,51 @@
     closePicker();
   });
 
+  // Chart builder
+  function addChartStep(value='') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Step';
+    input.value = value;
+    chartSteps.appendChild(input);
+    return input;
+  }
+  function openChartBuilder() {
+    chartBuilder.classList.add('open');
+    btnChart.setAttribute('aria-expanded', 'true');
+    chartSteps.innerHTML = '';
+    addChartStep();
+    addChartStep();
+    const first = chartSteps.querySelector('input');
+    if (first) first.focus();
+  }
+  function closeChartBuilder() {
+    chartBuilder.classList.remove('open');
+    btnChart.setAttribute('aria-expanded', 'false');
+  }
+  chartAddStep.addEventListener('click', () => { addChartStep(); });
+  chartInsert.addEventListener('click', () => {
+    const labels = [...chartSteps.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+    if (labels.length < 2) { toast('Need at least two steps', 'warn'); return; }
+    const ids = labels.map((_, i) => 'N' + i);
+    let def = 'graph TD\n';
+    for (let i=0; i<labels.length - 1; i++) {
+      def += `${ids[i]}[${labels[i]}]-->${ids[i+1]}[${labels[i+1]}]\n`;
+    }
+    insertMermaidChart(def);
+    closeChartBuilder();
+  });
+  btnChart.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
+  });
+  chartClose.addEventListener('click', closeChartBuilder);
+  document.addEventListener('click', (e) => {
+    if (!chartWrap.contains(e.target)) closeChartBuilder();
+  });
+
   // Formatting buttons
-  btnChart.addEventListener('click', () => insertMermaidChart());
+  btnUndo.addEventListener('click', () => { editor.focus(); undo(); });
   btnBold.addEventListener('click', () => { editor.focus(); document.execCommand('bold'); normaliseInlineTags(); });
   btnItalic.addEventListener('click', () => { editor.focus(); document.execCommand('italic'); normaliseInlineTags(); });
   btnStrike.addEventListener('click', () => { editor.focus(); document.execCommand('strikeThrough'); normaliseInlineTags(); });
@@ -417,10 +496,11 @@
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     const cmd = e.metaKey || e.ctrlKey;
-    if (e.key === 'Escape') { closePicker(); return; }
+    if (e.key === 'Escape') { closePicker(); closeChartBuilder(); return; }
     if (!cmd) return;
     const k = e.key.toLowerCase();
-    if (k === 'b'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('bold'); normaliseInlineTags(); } }
+    if (k === 'z'){ e.preventDefault(); undo(); }
+    else if (k === 'b'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('bold'); normaliseInlineTags(); } }
     else if (k === 'i'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('italic'); normaliseInlineTags(); } }
     else if (k === 'e'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('strikeThrough'); normaliseInlineTags(); } }
     else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
@@ -430,7 +510,7 @@
   });
 
   // Basic startup
-  editor.addEventListener('input', () => { /* keep DOM tidy */ });
+  editor.addEventListener('input', () => { snapshot(); });
   editor.addEventListener('blur', () => normaliseInlineTags());
 
   // Public sample if user opens without a file
