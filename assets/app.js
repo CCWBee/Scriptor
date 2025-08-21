@@ -15,6 +15,7 @@
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
   const btnStrike = $('#btnStrike');
+  const btnUndo = $('#btnUndo');
   const btnImage = $('#btnImage');
   const btnLink = $('#btnLink');
   const tableWrap = $('.table-wrap');
@@ -23,6 +24,14 @@
   const tableHint = $('#tableHint');
   const btnTable = $('#btnTable');
   const btnChart = $('#btnChart');
+  const chartWrap = $('.chart-wrap');
+  const chartBuilder = $('#chartBuilder');
+  const chartDir = $('#chartDir');
+  const chartNodes = $('#chartNodes');
+  const chartAdd = $('#chartAdd');
+  const chartPreview = $('#chartPreview');
+  const chartInsert = $('#chartInsert');
+  const chartCancel = $('#chartCancel');
   const toasts = $('#toasts');
   const root = document.documentElement;
   const shortcutsPanel = $('#shortcuts');
@@ -182,10 +191,8 @@
     }
   }
 
-  function insertMermaidChart(def = 'graph TD\nA-->B') {
-    if (mode !== 'wysiwyg') return;
-    const definition = prompt('Mermaid definition', def);
-    if (!definition) return;
+  function insertMermaidChart(definition) {
+    if (mode !== 'wysiwyg' || !definition) return;
     const div = document.createElement('div');
     div.className = 'mermaid';
     div.setAttribute('contenteditable', 'false');
@@ -389,6 +396,7 @@
   tablePicker.querySelector('.close').addEventListener('click', closePicker);
   document.addEventListener('click', (e) => {
     if (!tableWrap.contains(e.target)) closePicker();
+    if (!chartWrap.contains(e.target)) closeChartBuilder();
   });
 
   tableGrid.addEventListener('mousemove', (e) => {
@@ -408,8 +416,67 @@
     closePicker();
   });
 
+  // Chart builder
+  function resetChartBuilder(){
+    chartDir.value = 'TD';
+    chartNodes.innerHTML = '';
+    addChartNode();
+    addChartNode();
+    updateChartPreview();
+  }
+  function openChartBuilder(){
+    chartBuilder.classList.add('open');
+    btnChart.setAttribute('aria-expanded','true');
+    resetChartBuilder();
+    const first = chartNodes.querySelector('input');
+    if (first) first.focus();
+  }
+  function closeChartBuilder(){
+    chartBuilder.classList.remove('open');
+    btnChart.setAttribute('aria-expanded','false');
+  }
+  function addChartNode(text=''){
+    const idx = chartNodes.children.length + 1;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Step ' + idx;
+    input.value = text;
+    input.addEventListener('input', updateChartPreview);
+    chartNodes.appendChild(input);
+  }
+  function buildMermaidCode(){
+    const dir = chartDir.value;
+    const inputs = [...chartNodes.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+    if (!inputs.length) return '';
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let code = `graph ${dir}\n`;
+    for (let i=0;i<inputs.length;i++){
+      const id = letters[i];
+      code += `${id}["${inputs[i].replace(/"/g,'\\"')}"]\n`;
+      if (i < inputs.length-1) code += `${id}-->${letters[i+1]}\n`;
+    }
+    return code;
+  }
+  function updateChartPreview(){
+    const code = buildMermaidCode();
+    if (!code) { chartPreview.innerHTML = ''; return; }
+    chartPreview.innerHTML = `<div class="mermaid">${code}</div>`;
+    try{ mermaid.init(undefined, chartPreview.querySelector('.mermaid')); }catch(_){ }
+  }
+  btnChart.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
+  });
+  chartAdd.addEventListener('click', () => { addChartNode(); updateChartPreview(); chartNodes.lastChild.focus(); });
+  chartDir.addEventListener('change', updateChartPreview);
+  chartInsert.addEventListener('click', () => { const code = buildMermaidCode(); if (code.trim()) insertMermaidChart(code); closeChartBuilder(); });
+  chartCancel.addEventListener('click', closeChartBuilder);
+
   // Formatting buttons
-  btnChart.addEventListener('click', () => insertMermaidChart());
+  btnUndo.addEventListener('click', () => {
+    if (mode === 'wysiwyg') editor.focus(); else srcTA.focus();
+    document.execCommand('undo');
+  });
   btnBold.addEventListener('click', () => { editor.focus(); document.execCommand('bold'); normaliseInlineTags(); });
   btnItalic.addEventListener('click', () => { editor.focus(); document.execCommand('italic'); normaliseInlineTags(); });
   btnStrike.addEventListener('click', () => { editor.focus(); document.execCommand('strikeThrough'); normaliseInlineTags(); });
@@ -467,7 +534,7 @@
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     const cmd = e.metaKey || e.ctrlKey;
-    if (e.key === 'Escape') { closePicker(); return; }
+    if (e.key === 'Escape') { closePicker(); closeChartBuilder(); return; }
     if (!cmd) return;
     const k = e.key.toLowerCase();
     if (k === 'b'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('bold'); normaliseInlineTags(); } }
