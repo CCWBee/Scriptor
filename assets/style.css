@@ -55,7 +55,15 @@ body{
 }
 .btn[disabled], .btn[aria-disabled="true"]{opacity:.45; cursor:not-allowed}
 .btn:focus-visible{outline:2px solid var(--ring); outline-offset:2px}
-.btn:hover{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
+.btn:hover{background:var(--edge)}
+.btn:active{background:var(--edge)}
+.btn[aria-pressed="true"]{background:var(--edge)}
+@supports (background: color-mix(in srgb, black, white)) {
+  .btn:hover{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
+  .btn:active{background:color-mix(in srgb, var(--surface) 85%, var(--edge) 15%)}
+  .btn[aria-pressed="true"]{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
+  .table-picker .close:hover{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
+}
 .ico{width:18px; height:18px; display:inline-block}
 .sep{width:1px; height:26px; background:var(--edge); margin:0 .25rem}
 .spacer{flex:1 1 auto}
@@ -80,7 +88,7 @@ body{
   margin-top:.25rem; width:100%; padding:.3rem; font-size:1rem; border:1px solid var(--edge);
   background:#fff0; border-radius:.4rem; cursor:pointer;
 }
-.table-picker .close:hover{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
+.table-picker .close:hover{background:var(--edge)}
 
 /* Surface and editors */
 .surface{max-width:1100px; margin:1rem auto; padding:0 1rem}
