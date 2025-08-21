@@ -11,18 +11,6 @@
   <header class="ribbon" role="navigation" aria-label="Editor toolbar">
     <nav role="toolbar" aria-label="Formatting">
       <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
-      <button id="btnLoad" class="btn" title="Load .md file" aria-label="Load">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg>
-      </button>
-      <button id="btnExport" class="btn" title="Export as Markdown" aria-label="Export">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#export"/></svg>
-      </button>
-      <button id="btnSource" class="btn" title="Toggle source view" aria-pressed="false" aria-label="Source">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#code"/></svg>
-      </button>
-
-      <span class="spacer" aria-hidden="true"></span>
-
       <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg>
       </button>
@@ -67,6 +55,18 @@
       <button class="btn" title="Insert link  (stub)" aria-disabled="true" disabled>
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#link"/></svg>
       </button>
+
+      <span class="spacer" aria-hidden="true"></span>
+
+      <button id="btnLoad" class="btn" title="Upload .md file" aria-label="Upload">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Upload</span>
+      </button>
+      <button id="btnExport" class="btn" title="Download Markdown" aria-label="Download">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#export"/></svg><span>Download</span>
+      </button>
+      <button id="btnAdvanced" class="btn" title="Toggle advanced mode" aria-pressed="false" aria-label="Advanced">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#code"/></svg><span>Advanced</span>
+      </button>
     </nav>
   </header>
 
@@ -77,15 +77,16 @@
     </section>
   </main>
 
-  <aside class="shortcuts" aria-label="Keyboard shortcuts">
+  <aside id="shortcuts" class="shortcuts" aria-label="Keyboard shortcuts">
+    <button id="toggleShortcuts" class="toggle" aria-expanded="true" aria-label="Hide shortcuts">×</button>
     <h2>Shortcuts</h2>
     <ul>
       <li><kbd>Ctrl</kbd> + <kbd>B</kbd> Bold</li>
       <li><kbd>Ctrl</kbd> + <kbd>I</kbd> Italic</li>
       <li><kbd>Ctrl</kbd> + <kbd>E</kbd> Strikethrough</li>
       <li><kbd>Ctrl</kbd> + <kbd>1</kbd>–<kbd>4</kbd> Headings</li>
-      <li><kbd>Ctrl</kbd> + <kbd>/</kbd> Source view</li>
-      <li><kbd>Ctrl</kbd> + <kbd>D</kbd> Dark mode</li>
+      <li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>A</kbd> Advanced mode</li>
+      <li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>D</kbd> Dark mode</li>
       <li><kbd>Ctrl</kbd> + <kbd>S</kbd> Download</li>
     </ul>
   </aside>

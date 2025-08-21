@@ -10,7 +10,7 @@
   const dropZone = $('#dropZone');
   const btnLoad = $('#btnLoad');
   const btnExport = $('#btnExport');
-  const btnSource = $('#btnSource');
+  const btnAdvanced = $('#btnAdvanced');
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
   const btnStrike = $('#btnStrike');
@@ -21,6 +21,8 @@
   const btnTable = $('#btnTable');
   const toasts = $('#toasts');
   const root = document.documentElement;
+  const shortcutsPanel = $('#shortcuts');
+  const toggleShortcuts = $('#toggleShortcuts');
 
   function toast(msg, cls = '') {
     const el = document.createElement('div');
@@ -260,7 +262,7 @@
     document.execCommand('insertText', false, text);
   });
 
-  // Source toggle
+  // Advanced toggle
   function toggleSource(forceToSource) {
     const toSource = typeof forceToSource === 'boolean' ? forceToSource : (mode === 'wysiwyg');
     if (toSource) {
@@ -272,7 +274,7 @@
       editor.style.display = 'none';
       srcTA.style.display = 'block';
       srcTA.focus();
-      btnSource.setAttribute('aria-pressed', 'true');
+      btnAdvanced.setAttribute('aria-pressed', 'true');
       mode = 'source';
     } else {
       // textarea -> html
@@ -281,7 +283,7 @@
       srcTA.style.display = 'none';
       editor.style.display = 'block';
       editor.focus();
-      btnSource.setAttribute('aria-pressed', 'false');
+      btnAdvanced.setAttribute('aria-pressed', 'false');
       mode = 'wysiwyg';
     }
   }
@@ -346,8 +348,14 @@
 
   $$('.btn-h').forEach(b => b.addEventListener('click', () => { editor.focus(); applyHeading(+b.dataset.h); }));
 
-  btnSource.addEventListener('click', () => toggleSource());
+  btnAdvanced.addEventListener('click', () => toggleSource());
   btnExport.addEventListener('click', exportMarkdown);
+  toggleShortcuts.addEventListener('click', () => {
+    const collapsed = shortcutsPanel.classList.toggle('collapsed');
+    toggleShortcuts.setAttribute('aria-expanded', String(!collapsed));
+    toggleShortcuts.textContent = collapsed ? '≡' : '×';
+    document.body.classList.toggle('shortcuts-collapsed', collapsed);
+  });
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
@@ -359,9 +367,9 @@
     else if (k === 'i'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('italic'); normaliseInlineTags(); } }
     else if (k === 'e'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('strikeThrough'); normaliseInlineTags(); } }
     else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
-    else if (k === '/'){ e.preventDefault(); toggleSource(); }
+    else if (e.altKey && k === 'a'){ e.preventDefault(); toggleSource(); }
+    else if (e.altKey && k === 'd'){ e.preventDefault(); toggleTheme(); }
     else if (k === 's'){ e.preventDefault(); exportMarkdown(); }
-    else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
   });
 
   // Basic startup

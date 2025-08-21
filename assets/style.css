@@ -190,7 +190,21 @@ table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
   overflow-y:auto;
   font-size:.9rem;
   z-index:40;
+  transition:transform .3s;
 }
+.shortcuts.collapsed{transform:translateX(100%)}
+.shortcuts .toggle{
+  position:absolute;
+  left:-1.5rem;
+  top:.5rem;
+  padding:.25rem .3rem;
+  border:1px solid var(--edge);
+  border-right:none;
+  background:var(--surface);
+  border-radius:.5rem 0 0 .5rem;
+  cursor:pointer;
+}
+.shortcuts.collapsed .toggle{transform:translateX(-100%)}
 .shortcuts h2{
   margin-top:0;
   font-size:1rem;
@@ -205,5 +219,5 @@ table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
 }
 
 @media (min-width:900px){
-  #main{margin-right:220px}
+  body:not(.shortcuts-collapsed) #main{margin-right:220px}
 }
