@@ -25,10 +25,8 @@
   const btnTable = $('#btnTable');
   const btnChart = $('#btnChart');
   const chartWrap = $('.chart-wrap');
-  const chartBuilder = $('#chartBuilder');
-  const chartDir = $('#chartDir');
-  const chartNodes = $('#chartNodes');
-  const chartAdd = $('#chartAdd');
+  const chartDialog = $('#chartDialog');
+  const chartCode = $('#chartCode');
   const chartPreview = $('#chartPreview');
   const chartInsert = $('#chartInsert');
   const chartCancel = $('#chartCancel');
@@ -49,6 +47,7 @@
   let currentFileName = 'untitled.md';
   let md, td;
   let savedRange = null;
+  let editingChart = null;
 
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
@@ -328,12 +327,8 @@
   editor.addEventListener('dblclick', (e) => {
     const mer = e.target.closest('.mermaid');
     if (!mer || mode !== 'wysiwyg') return;
-    const updated = prompt('Mermaid definition', mer.dataset.code || '');
-    if (!updated) return;
-    mer.dataset.code = updated;
-    mer.innerHTML = updated;
-    mer.removeAttribute('data-processed');
-    if (window.mermaid) mermaid.init(undefined, mer);
+    editingChart = mer;
+    openChartDialog(mer.dataset.code || '');
   });
 
   // Advanced toggle
@@ -396,7 +391,7 @@
   tablePicker.querySelector('.close').addEventListener('click', closePicker);
   document.addEventListener('click', (e) => {
     if (!tableWrap.contains(e.target)) closePicker();
-    if (!chartWrap.contains(e.target)) closeChartBuilder();
+    if (!chartWrap.contains(e.target)) closeChartDialog();
   });
 
   tableGrid.addEventListener('mousemove', (e) => {
@@ -416,61 +411,47 @@
     closePicker();
   });
 
-  // Chart builder
-  function resetChartBuilder(){
-    chartDir.value = 'TD';
-    chartNodes.innerHTML = '';
-    addChartNode();
-    addChartNode();
+  // Chart dialog
+  function openChartDialog(code=''){
+    chartCode.value = code;
     updateChartPreview();
-  }
-  function openChartBuilder(){
-    chartBuilder.classList.add('open');
+    chartDialog.classList.add('open');
     btnChart.setAttribute('aria-expanded','true');
-    resetChartBuilder();
-    const first = chartNodes.querySelector('input');
-    if (first) first.focus();
+    chartCode.focus();
   }
-  function closeChartBuilder(){
-    chartBuilder.classList.remove('open');
+  function closeChartDialog(){
+    chartDialog.classList.remove('open');
     btnChart.setAttribute('aria-expanded','false');
-  }
-  function addChartNode(text=''){
-    const idx = chartNodes.children.length + 1;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Step ' + idx;
-    input.value = text;
-    input.addEventListener('input', updateChartPreview);
-    chartNodes.appendChild(input);
-  }
-  function buildMermaidCode(){
-    const dir = chartDir.value;
-    const inputs = [...chartNodes.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
-    if (!inputs.length) return '';
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let code = `graph ${dir}\n`;
-    for (let i=0;i<inputs.length;i++){
-      const id = letters[i];
-      code += `${id}["${inputs[i].replace(/"/g,'\\"')}"]\n`;
-      if (i < inputs.length-1) code += `${id}-->${letters[i+1]}\n`;
-    }
-    return code;
+    chartCode.value = '';
+    chartPreview.innerHTML = '';
+    editingChart = null;
   }
   function updateChartPreview(){
-    const code = buildMermaidCode();
+    const code = chartCode.value.trim();
     if (!code) { chartPreview.innerHTML = ''; return; }
     chartPreview.innerHTML = `<div class="mermaid">${code}</div>`;
     try{ mermaid.init(undefined, chartPreview.querySelector('.mermaid')); }catch(_){ }
   }
   btnChart.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
+    editingChart = null;
+    if (chartDialog.classList.contains('open')) closeChartDialog(); else openChartDialog();
   });
-  chartAdd.addEventListener('click', () => { addChartNode(); updateChartPreview(); chartNodes.lastChild.focus(); });
-  chartDir.addEventListener('change', updateChartPreview);
-  chartInsert.addEventListener('click', () => { const code = buildMermaidCode(); if (code.trim()) insertMermaidChart(code); closeChartBuilder(); });
-  chartCancel.addEventListener('click', closeChartBuilder);
+  chartCode.addEventListener('input', updateChartPreview);
+  chartInsert.addEventListener('click', () => {
+    const code = chartCode.value.trim();
+    if (!code) { closeChartDialog(); return; }
+    if (editingChart) {
+      editingChart.dataset.code = code;
+      editingChart.textContent = code;
+      editingChart.removeAttribute('data-processed');
+      if (window.mermaid) mermaid.init(undefined, editingChart);
+    } else {
+      insertMermaidChart(code);
+    }
+    closeChartDialog();
+  });
+  chartCancel.addEventListener('click', closeChartDialog);
 
   // Formatting buttons
   btnUndo.addEventListener('click', () => {

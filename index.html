@@ -52,27 +52,19 @@
           <button class="close" title="Close  Esc" aria-label="Close">×</button>
         </div>
       </div>
-      <div class="chart-wrap">
-        <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
-          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
-        </button>
-        <div id="chartBuilder" class="chart-builder" role="dialog" aria-modal="false" aria-label="Insert chart">
-          <div class="row">
-            <label for="chartDir">Direction</label>
-            <select id="chartDir">
-              <option value="TD">Top-down</option>
-              <option value="LR">Left-right</option>
-            </select>
-          </div>
-          <div id="chartNodes" class="nodes"></div>
-          <button id="chartAdd" class="add" type="button">Add step</button>
-          <div id="chartPreview" class="preview"></div>
-          <div class="actions">
-            <button id="chartInsert" type="button" class="btn">Insert</button>
-            <button id="chartCancel" type="button" class="btn">Close</button>
+        <div class="chart-wrap">
+          <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-haspopup="dialog" aria-controls="chartDialog" aria-label="Insert chart">
+            <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
+          </button>
+          <div id="chartDialog" class="chart-dialog" role="dialog" aria-modal="false" aria-label="Insert chart">
+            <textarea id="chartCode" aria-label="Mermaid definition" placeholder="graph TD\n  A-->B"></textarea>
+            <div id="chartPreview" class="preview"></div>
+            <div class="actions">
+              <button id="chartInsert" type="button" class="btn">Insert</button>
+              <button id="chartCancel" type="button" class="btn">Close</button>
+            </div>
           </div>
         </div>
-      </div>
 
       <button id="btnImage" class="btn" title="Insert image" aria-label="Insert image">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
