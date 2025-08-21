@@ -19,6 +19,7 @@
   const tableGrid = tablePicker.querySelector('.grid');
   const tableHint = $('#tableHint');
   const btnTable = $('#btnTable');
+  const btnChart = $('#btnChart');
   const toasts = $('#toasts');
   const root = document.documentElement;
   const shortcutsPanel = $('#shortcuts');
@@ -37,7 +38,7 @@
   let md, td;
 
   try {
-    if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm) {
+    if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
       throw new Error('Missing required libraries');
     }
     md = window.markdownit({
@@ -59,6 +60,16 @@
       filter: ['s', 'strike'],
       replacement: (content) => '~~' + content + '~~'
     });
+
+    td.addRule('mermaid', {
+      filter: (node) => node.nodeName === 'DIV' && node.classList.contains('mermaid'),
+      replacement: (_, node) => {
+        const code = node.dataset.code || '';
+        return '\n```mermaid\n' + code + '\n```\n';
+      }
+    });
+
+    mermaid.initialize({ startOnLoad: false });
   } catch (err) {
     console.error(err);
     toast('Required libraries failed to load', 'warn');
@@ -167,13 +178,47 @@
     }
   }
 
+  function insertMermaidChart(def = 'graph TD\nA-->B') {
+    if (mode !== 'wysiwyg') return;
+    const definition = prompt('Mermaid definition', def);
+    if (!definition) return;
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.setAttribute('contenteditable', 'false');
+    div.dataset.code = definition;
+    div.textContent = definition;
+    const rng = getSelectionRange();
+    if (rng) {
+      rng.deleteContents();
+      rng.insertNode(div);
+    } else {
+      editor.appendChild(div);
+    }
+    div.removeAttribute('data-processed');
+    if (window.mermaid) mermaid.init(undefined, div);
+  }
+
   function renderMarkdownToEditor(markdown, fromLoad=false) {
     try{
       const unsafe = md.render(markdown);
       const clean = DOMPurify.sanitize(unsafe, { USE_PROFILES: { html: true } });
-      editor.innerHTML = clean;
+      const tmp = document.createElement('div');
+      tmp.innerHTML = clean;
+      tmp.querySelectorAll('pre > code.language-mermaid').forEach(code => {
+        const div = document.createElement('div');
+        div.className = 'mermaid';
+        div.setAttribute('contenteditable','false');
+        div.dataset.code = code.textContent;
+        div.textContent = code.textContent;
+        code.parentElement.replaceWith(div);
+      });
+      editor.innerHTML = tmp.innerHTML;
       normaliseInlineTags();
       if (fromLoad) editor.focus();
+      editor.querySelectorAll('.mermaid').forEach(div => {
+        div.removeAttribute('data-processed');
+        if (window.mermaid) mermaid.init(undefined, div);
+      });
     } catch(e){
       console.error(e);
       toast('Failed to parse file', 'warn');
@@ -262,6 +307,17 @@
     document.execCommand('insertText', false, text);
   });
 
+  editor.addEventListener('dblclick', (e) => {
+    const mer = e.target.closest('.mermaid');
+    if (!mer || mode !== 'wysiwyg') return;
+    const updated = prompt('Mermaid definition', mer.dataset.code || '');
+    if (!updated) return;
+    mer.dataset.code = updated;
+    mer.innerHTML = updated;
+    mer.removeAttribute('data-processed');
+    if (window.mermaid) mermaid.init(undefined, mer);
+  });
+
   // Advanced toggle
   function toggleSource(forceToSource) {
     const toSource = typeof forceToSource === 'boolean' ? forceToSource : (mode === 'wysiwyg');
@@ -342,6 +398,7 @@
   });
 
   // Formatting buttons
+  btnChart.addEventListener('click', () => insertMermaidChart());
   btnBold.addEventListener('click', () => { editor.focus(); document.execCommand('bold'); normaliseInlineTags(); });
   btnItalic.addEventListener('click', () => { editor.focus(); document.execCommand('italic'); normaliseInlineTags(); });
   btnStrike.addEventListener('click', () => { editor.focus(); document.execCommand('strikeThrough'); normaliseInlineTags(); });
