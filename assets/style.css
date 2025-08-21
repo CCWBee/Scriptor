@@ -27,6 +27,32 @@
   }
 }
 
+:root[data-theme="light"]{
+  --bg: #ffffff;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --edge: #e5e7eb;
+  --ring: #2563eb;
+  --accent: #0ea5e9;
+  --accent-2: #10b981;
+  --warn: #b91c1c;
+  --table-odd: #f8fafc;
+  --surface: #ffffff;
+}
+
+:root[data-theme="dark"]{
+  --bg: #0b1020;
+  --fg: #e5e7eb;
+  --muted: #9aa5b1;
+  --edge: #1f2937;
+  --ring: #60a5fa;
+  --accent: #38bdf8;
+  --accent-2: #34d399;
+  --warn: #ef4444;
+  --table-odd: #0f172a;
+  --surface: #0c1426;
+}
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -150,3 +176,34 @@ body{
 
 /* Disable contenteditable outlines on nested cells */
 table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
+
+/* Shortcuts sidebar */
+.shortcuts{
+  position:fixed;
+  top:3.5rem;
+  right:0;
+  width:200px;
+  height:calc(100% - 3.5rem);
+  padding:1rem;
+  background:var(--surface);
+  border-left:1px solid var(--edge);
+  overflow-y:auto;
+  font-size:.9rem;
+  z-index:40;
+}
+.shortcuts h2{
+  margin-top:0;
+  font-size:1rem;
+}
+.shortcuts ul{list-style:none; margin:0; padding:0}
+.shortcuts li{margin:.3rem 0}
+.shortcuts kbd{
+  background:var(--edge);
+  padding:0 .25rem;
+  border-radius:3px;
+  font-size:.8rem;
+}
+
+@media (min-width:900px){
+  #main{margin-right:220px}
+}
