@@ -1,0 +1,375 @@
+// QuietMark editor
+(() => {
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  // Elements
+  const editor = $('#editor');
+  const srcTA = $('#source');
+  const fileInput = $('#fileInput');
+  const dropZone = $('#dropZone');
+  const btnLoad = $('#btnLoad');
+  const btnExport = $('#btnExport');
+  const btnSource = $('#btnSource');
+  const btnBold = $('#btnBold');
+  const btnItalic = $('#btnItalic');
+  const btnStrike = $('#btnStrike');
+  const tableWrap = $('.table-wrap');
+  const tablePicker = $('#tablePicker');
+  const tableGrid = tablePicker.querySelector('.grid');
+  const tableHint = $('#tableHint');
+  const btnTable = $('#btnTable');
+  const toasts = $('#toasts');
+
+  let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
+  let currentFileName = 'untitled.md';
+
+  // Markdown-it with GFM-like bits
+  const md = window.markdownit({
+    html: false,
+    linkify: true,
+    breaks: false
+  }).enable(['table','strikethrough']);
+
+  // Turndown
+  const td = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    bulletListMarker: '-',
+    codeBlockStyle: 'fenced',
+    emDelimiter: '_'
+  });
+  turndownPluginGfm.gfm(td); // tables, strikethrough, task lists etc.
+
+  // Rules to keep <s> mapping to ~~
+  td.addRule('sToStrike', {
+    filter: ['s', 'strike'],
+    replacement: (content) => '~~' + content + '~~'
+  });
+
+  // Helpers
+  function toast(msg, cls = '') {
+    const el = document.createElement('div');
+    el.className = 'toast ' + cls;
+    el.textContent = msg;
+    toasts.appendChild(el);
+    setTimeout(() => { el.classList.add('fade'); el.addEventListener('transitionend', () => el.remove(), { once:true }); }, 2400);
+  }
+
+  function normaliseInlineTags(root=editor){
+    // Replace b -> strong, i -> em, strike -> s, remove style spans
+    root.querySelectorAll('b').forEach(n => replaceTag(n, 'strong'));
+    root.querySelectorAll('i').forEach(n => replaceTag(n, 'em'));
+    root.querySelectorAll('strike').forEach(n => replaceTag(n, 's'));
+    root.querySelectorAll('span').forEach(n => {
+      if (!n.attributes.length || n.getAttributeNames().every(a => a === 'data-id')) unwrap(n);
+    });
+  }
+
+  function replaceTag(el, tag) {
+    const n = document.createElement(tag);
+    [...el.attributes].forEach(a => n.setAttribute(a.name, a.value));
+    while (el.firstChild) n.appendChild(el.firstChild);
+    el.replaceWith(n);
+    return n;
+  }
+  function unwrap(el){ while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el); el.remove(); }
+
+  function getSelectionRange() {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return null;
+    return sel.getRangeAt(0);
+  }
+
+  const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TD','TH']);
+
+  function findBlockAncestor(node) {
+    while (node && node !== editor) {
+      if (node.nodeType === 1 && BLOCKS.has(node.nodeName)) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function applyHeading(level) {
+    if (mode !== 'wysiwyg') return;
+    const rng = getSelectionRange();
+    if (!rng) return;
+    let node = findBlockAncestor(rng.startContainer);
+    if (!node) {
+      document.execCommand('formatBlock', false, 'p');
+      node = findBlockAncestor(rng.startContainer);
+      if (!node) return;
+    }
+    // do not convert list items or table cells into headings; instead, wrap inside as a heading-like style by toggling a <strong> on selection
+    if (node.nodeName === 'LI' || node.nodeName === 'TD' || node.nodeName === 'TH') {
+      document.execCommand('bold');
+      normaliseInlineTags();
+      return;
+    }
+    const tag = 'H' + level;
+    const isSame = node.nodeName === tag;
+    const target = isSame ? 'P' : tag;
+    const id = node.id || '';
+    const repl = replaceTag(node, target);
+    if (id) repl.id = id;
+    // move cursor to start of block
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    const nr = document.createRange();
+    nr.selectNodeContents(repl);
+    nr.collapse(true);
+    sel.addRange(nr);
+  }
+
+  function insertTable(rows, cols) {
+    if (mode !== 'wysiwyg') return;
+    const table = document.createElement('table');
+    table.setAttribute('contenteditable', 'false'); // keep structure stable
+    const tbody = document.createElement('tbody');
+    for (let r=0; r<rows; r++){
+      const tr = document.createElement('tr');
+      for (let c=0; c<cols; c++){
+        const tdCell = document.createElement('td');
+        tdCell.setAttribute('contenteditable', 'true');
+        tdCell.innerHTML = '<br>';
+        tr.appendChild(tdCell);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+
+    const rng = getSelectionRange();
+    if (rng) {
+      rng.deleteContents();
+      rng.insertNode(table);
+    } else {
+      editor.appendChild(table);
+    }
+    // place caret into first cell
+    const first = table.querySelector('td');
+    if (first) {
+      const sel = window.getSelection();
+      const nr = document.createRange();
+      nr.selectNodeContents(first);
+      nr.collapse(true);
+      sel.removeAllRanges(); sel.addRange(nr);
+    }
+  }
+
+  function renderMarkdownToEditor(markdown, fromLoad=false) {
+    try{
+      const unsafe = md.render(markdown);
+      const clean = DOMPurify.sanitize(unsafe, { USE_PROFILES: { html: true } });
+      editor.innerHTML = clean;
+      normaliseInlineTags();
+      if (fromLoad) editor.focus();
+    } catch(e){
+      console.error(e);
+      toast('Failed to parse file', 'warn');
+    }
+  }
+
+  function exportMarkdown() {
+    let mdOut = '';
+    if (mode === 'source') {
+      mdOut = srcTA.value || '';
+    } else {
+      normaliseInlineTags();
+      const html = editor.innerHTML;
+      mdOut = td.turndown(html);
+    }
+    if (!mdOut.trim()) { toast('Nothing to export', 'warn'); return; }
+    let name = currentFileName || 'untitled.md';
+    if (!/\.md$/i.test(name)) name += '.md';
+    const blob = new Blob([mdOut], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    toast('Exported ' + name, 'success');
+  }
+
+  // File loading
+  btnLoad.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (!/^(text\/markdown|text\/plain)$/i.test(f.type || 'text/markdown') && !/\.md$/i.test(f.name)) {
+      toast('Unsupported mime type', 'warn'); return;
+    }
+    try {
+      const txt = await f.text();
+      currentFileName = f.name;
+      renderMarkdownToEditor(txt, true);
+      if (mode === 'source') toggleSource(false);
+    } catch(err) {
+      console.error(err);
+      toast('Failed to parse file', 'warn');
+    } finally {
+      fileInput.value = '';
+    }
+  });
+
+  // Drag and drop
+  ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); dropZone.classList.add('dragover');
+  }));
+  ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('dragover');
+  }));
+  dropZone.addEventListener('drop', async (e) => {
+    const dt = e.dataTransfer;
+    if (!dt || !dt.files || !dt.files[0]) return;
+    const f = dt.files[0];
+    if (!/^(text\/markdown|text\/plain)$/i.test(f.type || 'text/markdown') && !/\.md$/i.test(f.name)) {
+      toast('Unsupported mime type', 'warn'); return;
+    }
+    try{
+      const txt = await f.text();
+      currentFileName = f.name;
+      renderMarkdownToEditor(txt, true);
+      if (mode === 'source') toggleSource(false);
+    }catch(err){
+      console.error(err);
+      toast('Failed to parse file', 'warn');
+    }
+  });
+
+  // Paste: keep it clean
+  editor.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, text);
+  });
+
+  // Source toggle
+  function toggleSource(forceToSource) {
+    const toSource = typeof forceToSource === 'boolean' ? forceToSource : (mode === 'wysiwyg');
+    if (toSource) {
+      // html -> md -> textarea
+      normaliseInlineTags();
+      const html = editor.innerHTML;
+      const mdOut = td.turndown(html);
+      srcTA.value = mdOut;
+      editor.style.display = 'none';
+      srcTA.style.display = 'block';
+      srcTA.focus();
+      btnSource.setAttribute('aria-pressed', 'true');
+      mode = 'source';
+    } else {
+      // textarea -> html
+      const mdIn = srcTA.value || '';
+      renderMarkdownToEditor(mdIn);
+      srcTA.style.display = 'none';
+      editor.style.display = 'block';
+      editor.focus();
+      btnSource.setAttribute('aria-pressed', 'false');
+      mode = 'wysiwyg';
+    }
+  }
+
+  // Table picker build
+  const GRID_SIZE = 10;
+  function buildTableGrid(){
+    tableGrid.innerHTML = '';
+    for (let r=1; r<=GRID_SIZE; r++){
+      for (let c=1; c<=GRID_SIZE; c++){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.r = r;
+        b.dataset.c = c;
+        tableGrid.appendChild(b);
+      }
+    }
+  }
+  buildTableGrid();
+
+  function openPicker() {
+    tablePicker.classList.add('open');
+    btnTable.setAttribute('aria-expanded','true');
+    tableHint.textContent = '0 × 0';
+    tableGrid.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  }
+  function closePicker() {
+    tablePicker.classList.remove('open');
+    btnTable.setAttribute('aria-expanded','false');
+  }
+
+  btnTable.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (tablePicker.classList.contains('open')) closePicker(); else openPicker();
+  });
+  tablePicker.querySelector('.close').addEventListener('click', closePicker);
+  document.addEventListener('click', (e) => {
+    if (!tableWrap.contains(e.target)) closePicker();
+  });
+
+  tableGrid.addEventListener('mousemove', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const R = +btn.dataset.r, C = +btn.dataset.c;
+    tableGrid.querySelectorAll('button').forEach(b => {
+      const r = +b.dataset.r, c = +b.dataset.c;
+      b.classList.toggle('active', r<=R && c<=C);
+    });
+    tableHint.textContent = `${R} × ${C}`;
+  });
+  tableGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    insertTable(+btn.dataset.r, +btn.dataset.c);
+    closePicker();
+  });
+
+  // Formatting buttons
+  btnBold.addEventListener('click', () => { document.execCommand('bold'); normaliseInlineTags(); editor.focus(); });
+  btnItalic.addEventListener('click', () => { document.execCommand('italic'); normaliseInlineTags(); editor.focus(); });
+  btnStrike.addEventListener('click', () => { document.execCommand('strikeThrough'); normaliseInlineTags(); editor.focus(); });
+
+  $$('.btn-h').forEach(b => b.addEventListener('click', () => applyHeading(+b.dataset.h)));
+
+  btnSource.addEventListener('click', () => toggleSource());
+  btnExport.addEventListener('click', exportMarkdown);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    const cmd = e.metaKey || e.ctrlKey;
+    if (e.key === 'Escape') { closePicker(); return; }
+    if (!cmd) return;
+    const k = e.key.toLowerCase();
+    if (k === 'b'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('bold'); normaliseInlineTags(); } }
+    else if (k === 'i'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('italic'); normaliseInlineTags(); } }
+    else if (k === 'e'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('strikeThrough'); normaliseInlineTags(); } }
+    else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
+  });
+
+  // Basic startup
+  editor.addEventListener('input', () => { /* keep DOM tidy */ });
+  editor.addEventListener('blur', () => normaliseInlineTags());
+
+  // Public sample if user opens without a file
+  const sample = [
+    '# QuietMark',
+    '',
+    'Edit like normal text; export to Markdown when ready.',
+    '',
+    '## Short list',
+    '',
+    '- One',
+    '- Two',
+    '',
+    '## Table',
+    '',
+    '| Name | Qty |',
+    '| --- | ---:|',
+    '| Apples | 3 |',
+    '| Pears | 5 |',
+    '',
+    'Some **bold**, some _italic_, some ~~strike~~, and a [link](https://example.org).'
+  ].join('\n');
+  renderMarkdownToEditor(sample);
+
+})();
