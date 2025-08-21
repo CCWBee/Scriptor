@@ -10,7 +10,7 @@
   const dropZone = $('#dropZone');
   const btnLoad = $('#btnLoad');
   const btnExport = $('#btnExport');
-  const btnAdvanced = $('#btnAdvanced');
+  const btnSource = $('#btnSource');
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
   const btnStrike = $('#btnStrike');
@@ -274,7 +274,7 @@
       editor.style.display = 'none';
       srcTA.style.display = 'block';
       srcTA.focus();
-      btnAdvanced.setAttribute('aria-pressed', 'true');
+      btnSource.setAttribute('aria-pressed', 'true');
       mode = 'source';
     } else {
       // textarea -> html
@@ -283,7 +283,7 @@
       srcTA.style.display = 'none';
       editor.style.display = 'block';
       editor.focus();
-      btnAdvanced.setAttribute('aria-pressed', 'false');
+      btnSource.setAttribute('aria-pressed', 'false');
       mode = 'wysiwyg';
     }
   }
@@ -348,7 +348,7 @@
 
   $$('.btn-h').forEach(b => b.addEventListener('click', () => { editor.focus(); applyHeading(+b.dataset.h); }));
 
-  btnAdvanced.addEventListener('click', () => toggleSource());
+  btnSource.addEventListener('click', () => toggleSource());
   btnExport.addEventListener('click', exportMarkdown);
   toggleShortcuts.addEventListener('click', () => {
     const collapsed = shortcutsPanel.classList.toggle('collapsed');
@@ -367,8 +367,8 @@
     else if (k === 'i'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('italic'); normaliseInlineTags(); } }
     else if (k === 'e'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('strikeThrough'); normaliseInlineTags(); } }
     else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
-    else if (e.altKey && k === 'a'){ e.preventDefault(); toggleSource(); }
-    else if (e.altKey && k === 'd'){ e.preventDefault(); toggleTheme(); }
+    else if (k === '/'){ e.preventDefault(); toggleSource(); }
+    else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
     else if (k === 's'){ e.preventDefault(); exportMarkdown(); }
   });
 
