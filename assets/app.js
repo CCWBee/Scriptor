@@ -325,11 +325,11 @@
   });
 
   // Formatting buttons
-  btnBold.addEventListener('click', () => { document.execCommand('bold'); normaliseInlineTags(); editor.focus(); });
-  btnItalic.addEventListener('click', () => { document.execCommand('italic'); normaliseInlineTags(); editor.focus(); });
-  btnStrike.addEventListener('click', () => { document.execCommand('strikeThrough'); normaliseInlineTags(); editor.focus(); });
+  btnBold.addEventListener('click', () => { editor.focus(); document.execCommand('bold'); normaliseInlineTags(); });
+  btnItalic.addEventListener('click', () => { editor.focus(); document.execCommand('italic'); normaliseInlineTags(); });
+  btnStrike.addEventListener('click', () => { editor.focus(); document.execCommand('strikeThrough'); normaliseInlineTags(); });
 
-  $$('.btn-h').forEach(b => b.addEventListener('click', () => applyHeading(+b.dataset.h)));
+  $$('.btn-h').forEach(b => b.addEventListener('click', () => { editor.focus(); applyHeading(+b.dataset.h); }));
 
   btnSource.addEventListener('click', () => toggleSource());
   btnExport.addEventListener('click', exportMarkdown);
