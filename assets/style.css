@@ -145,11 +145,6 @@ body{
 .toast.success{border-color:var(--accent-2)}
 .toast.fade{opacity:0; transition:opacity .3s ease}
 
-/* Buttons text label on narrow screens */
-@media (max-width: 640px){
-  .btn span{display:none}
-}
-
 /* High contrast focus vis */
 :focus-visible{scroll-margin: 100px}
 
