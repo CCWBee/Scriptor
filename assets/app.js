@@ -39,6 +39,7 @@
   let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
   let currentFileName = 'untitled.md';
   let md, td;
+  let savedRange = null;
 
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
@@ -250,10 +251,17 @@
     toast('Exported ' + name, 'success');
   }
 
-  function toggleTheme(){
-    const current = root.getAttribute('data-theme');
-    root.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  function setTheme(theme){
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem('theme', theme); } catch(_){ }
   }
+
+  function toggleTheme(){
+    const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  }
+
+  setTheme(localStorage.getItem('theme') || 'light');
 
   // File loading
   btnLoad.addEventListener('click', () => fileInput.click());
@@ -405,6 +413,10 @@
   btnBold.addEventListener('click', () => { editor.focus(); document.execCommand('bold'); normaliseInlineTags(); });
   btnItalic.addEventListener('click', () => { editor.focus(); document.execCommand('italic'); normaliseInlineTags(); });
   btnStrike.addEventListener('click', () => { editor.focus(); document.execCommand('strikeThrough'); normaliseInlineTags(); });
+  btnImage.addEventListener('mousedown', () => {
+    if (mode !== 'wysiwyg') return;
+    savedRange = getSelectionRange();
+  });
   btnImage.addEventListener('click', () => { if (mode !== 'wysiwyg') return; imgInput.click(); });
   btnLink.addEventListener('click', () => {
     if (mode !== 'wysiwyg') return;
@@ -425,11 +437,17 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
+      if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
       editor.focus();
       const dataUrl = reader.result;
       const alt = prompt('Alt text', '') || '';
       const safeAlt = alt.replace(/"/g, '&quot;');
       document.execCommand('insertHTML', false, `<img src="${dataUrl}" alt="${safeAlt}">`);
+      savedRange = null;
     };
     reader.readAsDataURL(file);
     imgInput.value = '';
