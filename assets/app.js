@@ -20,6 +20,7 @@
   const tableHint = $('#tableHint');
   const btnTable = $('#btnTable');
   const toasts = $('#toasts');
+  const root = document.documentElement;
 
   function toast(msg, cls = '') {
     const el = document.createElement('div');
@@ -199,6 +200,11 @@
     toast('Exported ' + name, 'success');
   }
 
+  function toggleTheme(){
+    const current = root.getAttribute('data-theme');
+    root.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  }
+
   // File loading
   btnLoad.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', async (e) => {
@@ -353,6 +359,9 @@
     else if (k === 'i'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('italic'); normaliseInlineTags(); } }
     else if (k === 'e'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('strikeThrough'); normaliseInlineTags(); } }
     else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
+    else if (k === '/'){ e.preventDefault(); toggleSource(); }
+    else if (k === 's'){ e.preventDefault(); exportMarkdown(); }
+    else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
   });
 
   // Basic startup
