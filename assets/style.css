@@ -12,21 +12,6 @@
   --surface: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root{
-    --bg: #0b1020;
-    --fg: #e5e7eb;
-    --muted: #9aa5b1;
-    --edge: #1f2937;
-    --ring: #60a5fa;
-    --accent: #38bdf8;
-    --accent-2: #34d399;
-    --warn: #ef4444;
-    --table-odd: #0f172a;
-    --surface: #0c1426;
-  }
-}
-
 :root[data-theme="light"]{
   --bg: #ffffff;
   --fg: #0f172a;
