@@ -7,6 +7,7 @@
   const editor = $('#editor');
   const srcTA = $('#source');
   const fileInput = $('#fileInput');
+  const imgInput = $('#imgInput');
   const dropZone = $('#dropZone');
   const btnLoad = $('#btnLoad');
   const btnExport = $('#btnExport');
@@ -14,6 +15,8 @@
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
   const btnStrike = $('#btnStrike');
+  const btnImage = $('#btnImage');
+  const btnLink = $('#btnLink');
   const tableWrap = $('.table-wrap');
   const tablePicker = $('#tablePicker');
   const tableGrid = tablePicker.querySelector('.grid');
@@ -402,6 +405,35 @@
   btnBold.addEventListener('click', () => { editor.focus(); document.execCommand('bold'); normaliseInlineTags(); });
   btnItalic.addEventListener('click', () => { editor.focus(); document.execCommand('italic'); normaliseInlineTags(); });
   btnStrike.addEventListener('click', () => { editor.focus(); document.execCommand('strikeThrough'); normaliseInlineTags(); });
+  btnImage.addEventListener('click', () => { if (mode !== 'wysiwyg') return; imgInput.click(); });
+  btnLink.addEventListener('click', () => {
+    if (mode !== 'wysiwyg') return;
+    const url = prompt('URL', 'https://');
+    if (!url) return;
+    editor.focus();
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) {
+      document.execCommand('createLink', false, url);
+    } else {
+      const text = prompt('Link text', url);
+      if (!text) return;
+      document.execCommand('insertHTML', false, `<a href="${url}">${text}</a>`);
+    }
+  });
+  imgInput.addEventListener('change', () => {
+    const file = imgInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      editor.focus();
+      const dataUrl = reader.result;
+      const alt = prompt('Alt text', '') || '';
+      const safeAlt = alt.replace(/"/g, '&quot;');
+      document.execCommand('insertHTML', false, `<img src="${dataUrl}" alt="${safeAlt}">`);
+    };
+    reader.readAsDataURL(file);
+    imgInput.value = '';
+  });
 
   $$('.btn-h').forEach(b => b.addEventListener('click', () => { editor.focus(); applyHeading(+b.dataset.h); }));
 

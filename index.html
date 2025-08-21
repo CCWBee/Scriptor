@@ -11,6 +11,7 @@
   <header class="ribbon" role="navigation" aria-label="Editor toolbar">
     <nav role="toolbar" aria-label="Formatting">
       <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
+      <input id="imgInput" type="file" accept="image/*" hidden>
       <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg>
       </button>
@@ -53,10 +54,10 @@
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
       </button>
 
-      <button class="btn" title="Insert image  (stub)" aria-disabled="true" disabled>
+      <button id="btnImage" class="btn" title="Insert image" aria-label="Insert image">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
       </button>
-      <button class="btn" title="Insert link  (stub)" aria-disabled="true" disabled>
+      <button id="btnLink" class="btn" title="Insert link" aria-label="Insert link">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#link"/></svg>
       </button>
 
