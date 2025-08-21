@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuietMark — Markdown editor</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M4 4h16v16H4zM6 7h12v2H6zm0 4h8v2H6zm0 4h5v2H6z'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="ribbon" role="navigation" aria-label="Editor toolbar">
+    <nav role="toolbar" aria-label="Formatting">
+      <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
+      <button id="btnLoad" class="btn" title="Load .md file" aria-label="Load">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Load</span>
+      </button>
+      <button id="btnExport" class="btn" title="Export as Markdown" aria-label="Export">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#export"/></svg><span>Export</span>
+      </button>
+      <button id="btnSource" class="btn" title="Toggle source view" aria-pressed="false" aria-label="Source">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#code"/></svg><span>Source</span>
+      </button>
+
+      <span class="spacer" aria-hidden="true"></span>
+
+      <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg><span>B</span>
+      </button>
+      <button id="btnItalic" class="btn" title="Italic  Ctrl or Cmd+I" aria-label="Italic">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#italic"/></svg><span>I</span>
+      </button>
+      <button id="btnStrike" class="btn" title="Strikethrough  Ctrl or Cmd+E" aria-label="Strikethrough">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#strike"/></svg><span>S</span>
+      </button>
+
+      <div class="sep" aria-hidden="true"></div>
+
+      <button data-h="1" class="btn btn-h" title="Heading 1  Ctrl or Cmd+1" aria-label="Heading 1">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h1"/></svg><span>H1</span>
+      </button>
+      <button data-h="2" class="btn btn-h" title="Heading 2  Ctrl or Cmd+2" aria-label="Heading 2">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h2"/></svg><span>H2</span>
+      </button>
+      <button data-h="3" class="btn btn-h" title="Heading 3  Ctrl or Cmd+3" aria-label="Heading 3">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h3"/></svg><span>H3</span>
+      </button>
+      <button data-h="4" class="btn btn-h" title="Heading 4  Ctrl or Cmd+4" aria-label="Heading 4">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h4"/></svg><span>H4</span>
+      </button>
+
+      <div class="sep" aria-hidden="true"></div>
+
+      <div class="table-wrap">
+        <button id="btnTable" class="btn" title="Insert table" aria-expanded="false" aria-controls="tablePicker" aria-label="Insert table">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#table"/></svg><span>Table</span>
+        </button>
+        <div id="tablePicker" class="table-picker" role="dialog" aria-modal="false" aria-label="Insert table size">
+          <div class="grid" aria-hidden="true"></div>
+          <div class="hint" id="tableHint">0 × 0</div>
+          <button class="close" title="Close  Esc" aria-label="Close">×</button>
+        </div>
+      </div>
+
+      <button class="btn" title="Insert image  (stub)" aria-disabled="true" disabled>
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg><span>Image</span>
+      </button>
+      <button class="btn" title="Insert link  (stub)" aria-disabled="true" disabled>
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#link"/></svg><span>Link</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section id="dropZone" class="surface" aria-label="Editor area">
+      <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true"></div>
+      <textarea id="source" class="source" aria-label="Markdown source" spellcheck="false"></textarea>
+    </section>
+  </main>
+
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- CDN libs -->
+  <script defer src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@2.4.7/dist/purify.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/turndown@7.1.2/dist/turndown.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm@1.0.4/dist/turndown-plugin-gfm.js"></script>
+  <!-- App -->
+  <script defer src="assets/app.js"></script>
+
+  <noscript>This editor needs JavaScript enabled.</noscript>
+</body>
+</html>
