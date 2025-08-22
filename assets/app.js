@@ -600,7 +600,7 @@
     btnFind.setAttribute('aria-expanded','false');
     lastFindIndex = 0;
   }
-  function escapeRegExp(str){ return str.replace(/[.*+?^${}()|[\]\]/g, '\$&'); }
+  function escapeRegExp(str){ return str.replace(/[.*+?^${}()|[\]\\]/g, '\$&'); }
   function selectTextInEditor(start, length){
     const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
     let pos = 0, node;
