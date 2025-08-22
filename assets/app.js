@@ -45,16 +45,6 @@
   const fmAdd = $('#fmAdd');
   const fmList = $('#fmList');
   const fmClose = $('#fmClose');
-  const findWrap = $('.find-wrap');
-  const btnFind = $('#btnFind');
-  const findDialog = $('#findDialog');
-  const findInput = $('#findInput');
-  const replaceInput = $('#replaceInput');
-  const findCase = $('#findCase');
-  const findNextBtn = $('#findNext');
-  const replaceBtn = $('#replaceOne');
-  const replaceAllBtn = $('#replaceAll');
-  const findClose = $('#findClose');
 
   // Prevent toolbar clicks from moving editor focus
   ribbon.addEventListener('mousedown', (e) => {
@@ -76,7 +66,7 @@
   let frontmatter = {};
 
   try {
-    if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
+    if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm) {
       throw new Error('Missing required libraries');
     }
     md = window.markdownit({
@@ -112,7 +102,12 @@
       replacement: () => '\n\n'
     });
 
-    mermaid.initialize({ startOnLoad: false });
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: false });
+    } else {
+      btnChart.disabled = true;
+      btnChart.setAttribute('aria-disabled', 'true');
+    }
   } catch (err) {
     console.error(err);
     toast('Required libraries failed to load', 'warn');
@@ -448,7 +443,6 @@
   function openPicker() {
     closeChartBuilder();
     closeFrontmatter();
-    closeFind();
     tablePicker.classList.add('open');
     btnTable.setAttribute('aria-expanded','true');
     tableHint.textContent = '0 × 0';
@@ -468,7 +462,6 @@
     if (!tableWrap.contains(e.target)) closePicker();
     if (!chartWrap.contains(e.target)) closeChartBuilder();
     if (!frontWrap.contains(e.target)) closeFrontmatter();
-    if (!findWrap.contains(e.target)) closeFind();
   });
 
   tableGrid.addEventListener('mousemove', (e) => {
@@ -499,7 +492,6 @@
   function openChartBuilder(){
     closePicker();
     closeFrontmatter();
-    closeFind();
     chartBuilder.classList.add('open');
     btnChart.setAttribute('aria-expanded','true');
     resetChartBuilder();
@@ -565,7 +557,6 @@
   function openFrontmatter(){
     closePicker();
     closeChartBuilder();
-    closeFind();
     renderFrontmatterList();
     fmEditor.classList.add('open');
     btnFrontmatter.setAttribute('aria-expanded','true');
@@ -585,101 +576,6 @@
   });
   btnFrontmatter.addEventListener('click', (e) => { e.stopPropagation(); if (fmEditor.classList.contains('open')) closeFrontmatter(); else openFrontmatter(); });
   fmClose.addEventListener('click', closeFrontmatter);
-
-  let lastFindIndex = 0;
-  function openFind(){
-    closePicker();
-    closeChartBuilder();
-    closeFrontmatter();
-    findDialog.classList.add('open');
-    btnFind.setAttribute('aria-expanded','true');
-    findInput.focus();
-  }
-  function closeFind(){
-    findDialog.classList.remove('open');
-    btnFind.setAttribute('aria-expanded','false');
-    lastFindIndex = 0;
-  }
-  function escapeRegExp(str){ return str.replace(/[.*+?^${}()|[\]\\]/g, '\$&'); }
-  function selectTextInEditor(start, length){
-    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
-    let pos = 0, node;
-    while ((node = walker.nextNode())) {
-      const next = pos + node.textContent.length;
-      if (start < next) {
-        const range = document.createRange();
-        range.setStart(node, start - pos);
-        let endNode = node, endOffset = start - pos + length;
-        while (endOffset > endNode.textContent.length) {
-          endOffset -= endNode.textContent.length;
-          endNode = walker.nextNode();
-          if (!endNode) break;
-        }
-        if (endNode) {
-          range.setEnd(endNode, endOffset);
-          const sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-          editor.focus();
-        }
-        break;
-      }
-      pos = next;
-    }
-  }
-  function findNext(){
-    const term = findInput.value;
-    if (!term) return;
-    const content = mode === 'wysiwyg' ? editor.textContent : srcTA.value;
-    const hay = findCase.checked ? content : content.toLowerCase();
-    const needle = findCase.checked ? term : term.toLowerCase();
-    const idx = hay.indexOf(needle, lastFindIndex);
-    if (idx === -1) { toast('No more matches', 'warn'); lastFindIndex = 0; return; }
-    if (mode === 'wysiwyg') selectTextInEditor(idx, term.length);
-    else { srcTA.focus(); srcTA.setSelectionRange(idx, idx + term.length); }
-    lastFindIndex = idx + term.length;
-  }
-  function replaceCurrent(){
-    const term = findInput.value;
-    if (!term) return;
-    if (mode === 'wysiwyg') {
-      const sel = window.getSelection();
-      if (!sel.rangeCount) { findNext(); return; }
-      const selected = sel.toString();
-      const cmpSel = findCase.checked ? selected : selected.toLowerCase();
-      const cmpTerm = findCase.checked ? term : term.toLowerCase();
-      if (cmpSel !== cmpTerm) { findNext(); return; }
-      document.execCommand('insertText', false, replaceInput.value);
-    } else {
-      const start = srcTA.selectionStart;
-      const end = srcTA.selectionEnd;
-      const selected = srcTA.value.substring(start, end);
-      const cmpSel = findCase.checked ? selected : selected.toLowerCase();
-      const cmpTerm = findCase.checked ? term : term.toLowerCase();
-      if (cmpSel !== cmpTerm) { findNext(); return; }
-      srcTA.setRangeText(replaceInput.value, start, end, 'end');
-      srcTA.setSelectionRange(start + replaceInput.value.length, start + replaceInput.value.length);
-    }
-    lastFindIndex = mode === 'wysiwyg' ? lastFindIndex : srcTA.selectionStart;
-  }
-  function replaceAll(){
-    const term = findInput.value;
-    if (!term) return;
-    const flags = findCase.checked ? 'g' : 'gi';
-    const re = new RegExp(escapeRegExp(term), flags);
-    if (mode === 'wysiwyg') {
-      editor.innerHTML = editor.innerHTML.replace(re, replaceInput.value);
-    } else {
-      srcTA.value = srcTA.value.replace(re, replaceInput.value);
-    }
-    lastFindIndex = 0;
-  }
-  btnFind.addEventListener('click', (e) => { e.stopPropagation(); if (findDialog.classList.contains('open')) closeFind(); else openFind(); });
-  findClose.addEventListener('click', closeFind);
-  findDialog.addEventListener('click', e => e.stopPropagation());
-  findNextBtn.addEventListener('click', findNext);
-  replaceBtn.addEventListener('click', replaceCurrent);
-  replaceAllBtn.addEventListener('click', replaceAll);
 
   // Formatting buttons
   btnUndo.addEventListener('click', () => {
@@ -761,7 +657,7 @@
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     const cmd = e.metaKey || e.ctrlKey;
-    if (e.key === 'Escape') { closePicker(); closeChartBuilder(); closeFrontmatter(); closeFind(); return; }
+    if (e.key === 'Escape') { closePicker(); closeChartBuilder(); closeFrontmatter(); return; }
     if (!cmd) return;
     const k = e.key.toLowerCase();
     if (k === 'b'){ e.preventDefault(); if (mode==='wysiwyg'){ document.execCommand('bold'); normaliseInlineTags(); } }
@@ -771,7 +667,6 @@
     else if (k === '/'){ e.preventDefault(); toggleSource(); }
     else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
     else if (k === 's'){ e.preventDefault(); exportMarkdown(); }
-    else if (k === 'f'){ e.preventDefault(); if (findDialog.classList.contains('open')) closeFind(); else openFind(); }
   });
 
   // Basic startup
