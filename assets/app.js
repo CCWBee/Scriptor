@@ -44,8 +44,9 @@
   const fmAdd = $('#fmAdd');
   const fmList = $('#fmList');
   const fmClose = $('#fmClose');
-  const findWrap = $('#findWrap');
+  const findWrap = $('.find-wrap');
   const btnFind = $('#btnFind');
+  const findDialog = $('#findDialog');
   const findInput = $('#findInput');
   const replaceInput = $('#replaceInput');
   const findCase = $('#findCase');
@@ -570,13 +571,17 @@
   fmClose.addEventListener('click', closeFrontmatter);
 
   let lastFindIndex = 0;
-  findWrap.addEventListener('toggle', () => {
-    const isOpen = findWrap.open;
-    btnFind.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    if (isOpen) findInput.focus(); else lastFindIndex = 0;
-  });
-  function closeFind(){ findWrap.open = false; }
-  function escapeRegExp(str){ return str.replace(/[.*+?^${}()|[\]\\]/g, '\$&'); }
+  function openFind(){
+    findDialog.classList.add('open');
+    btnFind.setAttribute('aria-expanded','true');
+    findInput.focus();
+  }
+  function closeFind(){
+    findDialog.classList.remove('open');
+    btnFind.setAttribute('aria-expanded','false');
+    lastFindIndex = 0;
+  }
+  function escapeRegExp(str){ return str.replace(/[.*+?^${}()|[\]\]/g, '\$&'); }
   function selectTextInEditor(start, length){
     const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
     let pos = 0, node;
@@ -650,6 +655,7 @@
     }
     lastFindIndex = 0;
   }
+  btnFind.addEventListener('click', (e) => { e.stopPropagation(); if (findDialog.classList.contains('open')) closeFind(); else openFind(); });
   findClose.addEventListener('click', closeFind);
   findNextBtn.addEventListener('click', findNext);
   replaceBtn.addEventListener('click', replaceCurrent);
@@ -745,7 +751,7 @@
     else if (k === '/'){ e.preventDefault(); toggleSource(); }
     else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
     else if (k === 's'){ e.preventDefault(); exportMarkdown(); }
-    else if (k === 'f'){ e.preventDefault(); findWrap.open = !findWrap.open; }
+    else if (k === 'f'){ e.preventDefault(); if (findDialog.classList.contains('open')) closeFind(); else openFind(); }
   });
 
   // Basic startup
