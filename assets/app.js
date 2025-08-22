@@ -91,6 +91,11 @@
       }
     });
 
+    td.addRule('preserveBlank', {
+      filter: (node) => node.nodeName === 'P' && node.innerHTML.trim() === '',
+      replacement: () => '\n\n'
+    });
+
     mermaid.initialize({ startOnLoad: false });
   } catch (err) {
     console.error(err);
@@ -214,15 +219,15 @@
     } else {
       editor.appendChild(table);
     }
-    // place caret into first cell
-    const first = table.querySelector('td');
-    if (first) {
-      const sel = window.getSelection();
-      const nr = document.createRange();
-      nr.selectNodeContents(first);
-      nr.collapse(true);
-      sel.removeAllRanges(); sel.addRange(nr);
-    }
+    const blank = document.createElement('p');
+    blank.innerHTML = '<br>';
+    table.insertAdjacentElement('afterend', blank);
+    const sel = window.getSelection();
+    const nr = document.createRange();
+    nr.selectNodeContents(blank);
+    nr.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(nr);
   }
 
   function insertMermaidChart(definition) {
@@ -595,7 +600,25 @@
       const dataUrl = reader.result;
       const alt = prompt('Alt text', '') || '';
       const safeAlt = alt.replace(/"/g, '&quot;');
-      document.execCommand('insertHTML', false, `<img src="${dataUrl}" alt="${safeAlt}">`);
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.alt = safeAlt;
+      const rng = getSelectionRange();
+      if (rng) {
+        rng.deleteContents();
+        rng.insertNode(img);
+      } else {
+        editor.appendChild(img);
+      }
+      const blank = document.createElement('p');
+      blank.innerHTML = '<br>';
+      img.insertAdjacentElement('afterend', blank);
+      const sel = window.getSelection();
+      const nr = document.createRange();
+      nr.selectNodeContents(blank);
+      nr.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(nr);
       savedRange = null;
     };
     reader.readAsDataURL(file);

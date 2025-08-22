@@ -157,6 +157,7 @@ body{
 .editor h3{font-size:1.3rem}
 .editor h4{font-size:1.15rem}
 .editor p{margin:.6em 0}
+.editor p:empty{margin:0; padding:.6em 0}
 .editor strong{font-weight:700}
 .editor em{font-style:italic}
 .editor s{opacity:.9; text-decoration: line-through}
