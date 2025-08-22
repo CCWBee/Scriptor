@@ -68,6 +68,7 @@
   let savedRange = null;
   let frontmatter = {};
 
+  let libsOk = true;
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
       throw new Error('Missing required libraries');
@@ -107,10 +108,13 @@
 
     mermaid.initialize({ startOnLoad: false });
   } catch (err) {
+    libsOk = false;
     console.error(err);
     toast('Required libraries failed to load', 'warn');
-    document.querySelectorAll('.btn').forEach(b => { b.disabled = true; b.setAttribute('aria-disabled','true'); });
-    return;
+  }
+
+  if (!libsOk) {
+    [btnSource, btnExport].forEach(b => { b.disabled = true; b.setAttribute('aria-disabled', 'true'); });
   }
 
   function normaliseInlineTags(root=editor){
@@ -264,9 +268,10 @@
   }
 
   function renderMarkdownToEditor(markdown, fromLoad=false) {
-    try{
+    try {
       const { fm, body } = extractFrontmatter(markdown);
       frontmatter = fm;
+      if (!md || !DOMPurify) { editor.textContent = body; return; }
       const unsafe = md.render(body);
       const clean = DOMPurify.sanitize(unsafe, { USE_PROFILES: { html: true } });
       const tmp = document.createElement('div');
@@ -286,13 +291,14 @@
         div.removeAttribute('data-processed');
         if (window.mermaid) mermaid.init(undefined, div);
       });
-    } catch(e){
+    } catch(e) {
       console.error(e);
       toast('Failed to parse file', 'warn');
     }
   }
 
   function exportMarkdown() {
+    if (!td) { toast('Export unavailable', 'warn'); return; }
     let mdOut = '';
     if (mode === 'source') {
       mdOut = srcTA.value || '';
@@ -396,6 +402,7 @@
 
   // Advanced toggle
   function toggleSource(forceToSource) {
+    if (!td) { toast('Advanced mode unavailable', 'warn'); return; }
     const toSource = typeof forceToSource === 'boolean' ? forceToSource : (mode === 'wysiwyg');
     if (toSource) {
       // html -> md -> textarea
