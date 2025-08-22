@@ -116,6 +116,17 @@ body{
 .chart-builder .preview{border:1px solid var(--edge); border-radius:.3rem; padding:.4rem; min-height:60px; margin-bottom:.5rem}
 .chart-builder .actions{display:flex; justify-content:flex-end; gap:.5rem}
 
+/* Find/replace */
+.find-wrap{position:relative}
+.find-dialog{
+  position:absolute; top:2.6rem; left:0; border:1px solid var(--edge); background:var(--surface);
+  border-radius:.5rem; box-shadow:0 6px 24px rgba(0,0,0,.12); padding:.5rem; display:none; z-index:50; width:260px;
+}
+.find-dialog.open{display:block}
+.find-dialog .row{display:flex; gap:.5rem; margin-bottom:.5rem; align-items:center}
+.find-dialog .row input{flex:1; padding:.3rem .4rem; border:1px solid var(--edge); border-radius:.3rem}
+.find-dialog .actions{display:flex; justify-content:flex-end; gap:.5rem}
+
 /* Frontmatter editor */
 .frontmatter-wrap{position:relative}
 .frontmatter-editor{
