@@ -175,14 +175,12 @@ body{
 .editor a{color:var(--accent)}
 .editor ul, .editor ol{padding-left:1.4rem}
 .editor table{
-  border-collapse:collapse; width:100%; margin:1rem 0;
-  border:1px solid var(--edge); background:var(--surface)
+  border-collapse:collapse; width:100%; max-width:100%; margin:1rem 0;
+  border:1px solid var(--edge); background:var(--surface); table-layout:fixed
 }
 .editor th, .editor td{
-  border:1px solid var(--edge); padding:.5rem .6rem; vertical-align:top
+  border:1px solid var(--edge); padding:.5rem .6rem; vertical-align:top; word-break:break-word
 }
-.editor th:not(:last-child), .editor td:not(:last-child){white-space:nowrap; width:1%}
-.editor th:last-child, .editor td:last-child{width:100%}
 .editor tbody tr:nth-child(odd){background:var(--table-odd)}
 .editor td:focus{outline:2px solid var(--accent-2); outline-offset:-2px}
 
