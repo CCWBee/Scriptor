@@ -121,7 +121,7 @@ body{
 /* Frontmatter editor */
 .frontmatter-wrap{position:relative}
 .frontmatter-editor{
-  position:absolute; top:2.6rem; left:0; border:1px solid var(--edge); background:var(--surface);
+  position:absolute; top:2.6rem; right:0; border:1px solid var(--edge); background:var(--surface);
   border-radius:.5rem; box-shadow:0 6px 24px rgba(0,0,0,.12); padding:.5rem; display:none; z-index:50; width:260px;
 }
 .frontmatter-editor.open{display:block}
