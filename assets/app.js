@@ -18,6 +18,7 @@
   const btnUndo = $('#btnUndo');
   const btnImage = $('#btnImage');
   const btnLink = $('#btnLink');
+  const ribbon = $('.ribbon');
   const tableWrap = $('.table-wrap');
   const tablePicker = $('#tablePicker');
   const tableGrid = tablePicker.querySelector('.grid');
@@ -54,6 +55,11 @@
   const replaceBtn = $('#replaceOne');
   const replaceAllBtn = $('#replaceAll');
   const findClose = $('#findClose');
+
+  // Prevent toolbar clicks from moving editor focus
+  ribbon.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) e.preventDefault();
+  });
 
   function toast(msg, cls = '') {
     const el = document.createElement('div');

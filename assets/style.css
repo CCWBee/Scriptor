@@ -42,6 +42,7 @@
 html,body{height:100%}
 body{
   margin:0;
+  padding-top:3.5rem;
   background:var(--bg);
   color:var(--fg);
   font:16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
@@ -51,7 +52,8 @@ body{
 
 /* Ribbon toolbar */
 .ribbon{
-  position:sticky; top:0; z-index:20;
+  position:fixed;
+  top:0; left:0; right:0; z-index:20;
   border-bottom:1px solid var(--edge);
   background:linear-gradient(to bottom, var(--surface), color-mix(in srgb, var(--surface) 90%, var(--edge) 10%));
 }
