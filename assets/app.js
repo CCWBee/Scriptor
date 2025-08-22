@@ -46,10 +46,12 @@
   const fmList = $('#fmList');
   const fmClose = $('#fmClose');
 
-  // Prevent toolbar clicks from moving editor focus
-  ribbon.addEventListener('mousedown', (e) => {
+  // Prevent toolbar clicks from moving editor focus across input types
+  function keepEditorFocus(e) {
     if (e.target.closest('button')) e.preventDefault();
-  });
+  }
+  ribbon.addEventListener('pointerdown', keepEditorFocus);
+  ribbon.addEventListener('mousedown', keepEditorFocus);
 
   function toast(msg, cls = '') {
     const el = document.createElement('div');
