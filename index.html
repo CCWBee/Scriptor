@@ -89,26 +89,6 @@
       <button id="btnExport" class="btn" title="Download Markdown" aria-label="Download">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#export"/></svg><span>Download</span>
       </button>
-      <div class="find-wrap">
-        <button id="btnFind" class="btn" title="Find and replace  Ctrl or Cmd+F" aria-expanded="false" aria-controls="findDialog" aria-label="Find">
-          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#search"/></svg><span>Find</span>
-        </button>
-        <div id="findDialog" class="find-dialog" role="dialog" aria-modal="false" aria-label="Find and replace">
-          <div class="row">
-            <input id="findInput" type="text" placeholder="Find">
-            <input id="replaceInput" type="text" placeholder="Replace">
-          </div>
-          <div class="row">
-            <label><input id="findCase" type="checkbox">Case sensitive</label>
-          </div>
-          <div class="actions">
-            <button id="findNext" type="button" class="btn">Find next</button>
-            <button id="replaceOne" type="button" class="btn">Replace</button>
-            <button id="replaceAll" type="button" class="btn">Replace all</button>
-            <button id="findClose" type="button" class="btn">Close</button>
-          </div>
-        </div>
-      </div>
       <div class="frontmatter-wrap">
         <button id="btnFrontmatter" class="btn" title="Edit frontmatter" aria-expanded="false" aria-controls="frontmatterEditor" aria-label="Frontmatter">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Frontmatter</span>
@@ -154,12 +134,14 @@
 
   <div id="toasts" class="toasts" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Vendor libs -->
-  <script defer src="assets/vendor/markdown-it.min.js"></script>
-  <script defer src="assets/vendor/purify.min.js"></script>
-  <script defer src="assets/vendor/turndown.js"></script>
-  <script defer src="assets/vendor/turndown-plugin-gfm.js"></script>
-  <script defer src="assets/vendor/mermaid.min.js"></script>
+    <!-- Polyfills -->
+    <script defer src="assets/polyfills.js"></script>
+    <!-- Vendor libs -->
+    <script defer src="assets/vendor/markdown-it.min.js"></script>
+    <script defer src="assets/vendor/purify.min.js"></script>
+    <script defer src="assets/vendor/turndown.js"></script>
+    <script defer src="assets/vendor/turndown-plugin-gfm.js"></script>
+    <script defer src="assets/vendor/mermaid.min.js"></script>
   <!-- App -->
   <script defer src="assets/app.js"></script>
 
