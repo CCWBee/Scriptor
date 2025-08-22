@@ -89,11 +89,11 @@
       <button id="btnExport" class="btn" title="Download Markdown" aria-label="Download">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#export"/></svg><span>Download</span>
       </button>
-      <div class="find-wrap">
-        <button id="btnFind" class="btn" title="Find and replace  Ctrl or Cmd+F" aria-expanded="false" aria-controls="findDialog" aria-label="Find">
+      <details id="findWrap" class="find-wrap">
+        <summary id="btnFind" class="btn" title="Find and replace  Ctrl or Cmd+F" aria-expanded="false" aria-controls="findDialog" aria-label="Find">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#search"/></svg><span>Find</span>
-        </button>
-        <div id="findDialog" class="find-dialog" role="dialog" aria-modal="false" aria-label="Find and replace">
+        </summary>
+        <div id="findDialog" class="find-dialog" role="dialog" aria-label="Find and replace">
           <div class="row">
             <input id="findInput" type="text" placeholder="Find">
             <input id="replaceInput" type="text" placeholder="Replace">
@@ -108,7 +108,7 @@
             <button id="findClose" type="button" class="btn">Close</button>
           </div>
         </div>
-      </div>
+      </details>
       <div class="frontmatter-wrap">
         <button id="btnFrontmatter" class="btn" title="Edit frontmatter" aria-expanded="false" aria-controls="frontmatterEditor" aria-label="Frontmatter">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Frontmatter</span>
