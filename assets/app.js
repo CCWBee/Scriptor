@@ -440,6 +440,9 @@
   buildTableGrid();
 
   function openPicker() {
+    closeChartBuilder();
+    closeFrontmatter();
+    closeFind();
     tablePicker.classList.add('open');
     btnTable.setAttribute('aria-expanded','true');
     tableHint.textContent = '0 × 0';
@@ -488,6 +491,9 @@
     updateChartPreview();
   }
   function openChartBuilder(){
+    closePicker();
+    closeFrontmatter();
+    closeFind();
     chartBuilder.classList.add('open');
     btnChart.setAttribute('aria-expanded','true');
     resetChartBuilder();
@@ -551,9 +557,13 @@
     });
   }
   function openFrontmatter(){
+    closePicker();
+    closeChartBuilder();
+    closeFind();
     renderFrontmatterList();
     fmEditor.classList.add('open');
     btnFrontmatter.setAttribute('aria-expanded','true');
+    fmField.focus();
   }
   function closeFrontmatter(){
     fmEditor.classList.remove('open');
@@ -572,6 +582,9 @@
 
   let lastFindIndex = 0;
   function openFind(){
+    closePicker();
+    closeChartBuilder();
+    closeFrontmatter();
     findDialog.classList.add('open');
     btnFind.setAttribute('aria-expanded','true');
     findInput.focus();
@@ -657,6 +670,7 @@
   }
   btnFind.addEventListener('click', (e) => { e.stopPropagation(); if (findDialog.classList.contains('open')) closeFind(); else openFind(); });
   findClose.addEventListener('click', closeFind);
+  findDialog.addEventListener('click', e => e.stopPropagation());
   findNextBtn.addEventListener('click', findNext);
   replaceBtn.addEventListener('click', replaceCurrent);
   replaceAllBtn.addEventListener('click', replaceAll);
