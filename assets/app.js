@@ -36,6 +36,14 @@
   const root = document.documentElement;
   const shortcutsPanel = $('#shortcuts');
   const toggleShortcuts = $('#toggleShortcuts');
+  const frontWrap = $('.frontmatter-wrap');
+  const btnFrontmatter = $('#btnFrontmatter');
+  const fmEditor = $('#frontmatterEditor');
+  const fmField = $('#fmField');
+  const fmValue = $('#fmValue');
+  const fmAdd = $('#fmAdd');
+  const fmList = $('#fmList');
+  const fmClose = $('#fmClose');
 
   function toast(msg, cls = '') {
     const el = document.createElement('div');
@@ -49,6 +57,7 @@
   let currentFileName = 'untitled.md';
   let md, td;
   let savedRange = null;
+  let frontmatter = {};
 
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm || !window.mermaid) {
@@ -113,6 +122,31 @@
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return null;
     return sel.getRangeAt(0);
+  }
+
+  function extractFrontmatter(text) {
+    const fm = {};
+    if (text.startsWith('---')) {
+      const end = text.indexOf('\n---', 3);
+      if (end !== -1) {
+        const fmText = text.slice(3, end).trim();
+        fmText.split(/\r?\n/).forEach(line => {
+          const idx = line.indexOf(':');
+          if (idx !== -1) {
+            const key = line.slice(0, idx).trim();
+            const val = line.slice(idx + 1).trim();
+            fm[key] = val;
+          }
+        });
+        text = text.slice(end + 4);
+        if (text.startsWith('\n')) text = text.slice(1);
+      }
+    }
+    return { fm, body: text };
+  }
+
+  function frontmatterToYAML(obj) {
+    return Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join('\n');
   }
 
   const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TD','TH']);
@@ -193,6 +227,12 @@
 
   function insertMermaidChart(definition) {
     if (mode !== 'wysiwyg' || !definition) return;
+    if (savedRange) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+      savedRange = null;
+    }
     const div = document.createElement('div');
     div.className = 'mermaid';
     div.setAttribute('contenteditable', 'false');
@@ -211,7 +251,9 @@
 
   function renderMarkdownToEditor(markdown, fromLoad=false) {
     try{
-      const unsafe = md.render(markdown);
+      const { fm, body } = extractFrontmatter(markdown);
+      frontmatter = fm;
+      const unsafe = md.render(body);
       const clean = DOMPurify.sanitize(unsafe, { USE_PROFILES: { html: true } });
       const tmp = document.createElement('div');
       tmp.innerHTML = clean;
@@ -245,6 +287,8 @@
       const html = editor.innerHTML;
       mdOut = td.turndown(html);
     }
+    const fmText = frontmatterToYAML(frontmatter);
+    if (fmText) mdOut = `---\n${fmText}\n---\n\n` + mdOut;
     if (!mdOut.trim()) { toast('Nothing to export', 'warn'); return; }
     let name = currentFileName || 'untitled.md';
     if (!/\.md$/i.test(name)) name += '.md';
@@ -343,7 +387,9 @@
       // html -> md -> textarea
       normaliseInlineTags();
       const html = editor.innerHTML;
-      const mdOut = td.turndown(html);
+      let mdOut = td.turndown(html);
+      const fmText = frontmatterToYAML(frontmatter);
+      if (fmText) mdOut = `---\n${fmText}\n---\n\n` + mdOut;
       srcTA.value = mdOut;
       editor.style.display = 'none';
       srcTA.style.display = 'block';
@@ -397,6 +443,7 @@
   document.addEventListener('click', (e) => {
     if (!tableWrap.contains(e.target)) closePicker();
     if (!chartWrap.contains(e.target)) closeChartBuilder();
+    if (!frontWrap.contains(e.target)) closeFrontmatter();
   });
 
   tableGrid.addEventListener('mousemove', (e) => {
@@ -463,6 +510,7 @@
     chartPreview.innerHTML = `<div class="mermaid">${code}</div>`;
     try{ mermaid.init(undefined, chartPreview.querySelector('.mermaid')); }catch(_){ }
   }
+  btnChart.addEventListener('mousedown', () => { if (mode !== 'wysiwyg') return; savedRange = getSelectionRange(); });
   btnChart.addEventListener('click', (e) => {
     e.stopPropagation();
     if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
@@ -471,6 +519,40 @@
   chartDir.addEventListener('change', updateChartPreview);
   chartInsert.addEventListener('click', () => { const code = buildMermaidCode(); if (code.trim()) insertMermaidChart(code); closeChartBuilder(); });
   chartCancel.addEventListener('click', closeChartBuilder);
+
+  function renderFrontmatterList(){
+    fmList.innerHTML = '';
+    Object.entries(frontmatter).forEach(([k,v]) => {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = `${k}: ${v}`;
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.textContent = '×';
+      rm.addEventListener('click', () => { delete frontmatter[k]; renderFrontmatterList(); });
+      li.appendChild(span); li.appendChild(rm);
+      fmList.appendChild(li);
+    });
+  }
+  function openFrontmatter(){
+    renderFrontmatterList();
+    fmEditor.classList.add('open');
+    btnFrontmatter.setAttribute('aria-expanded','true');
+  }
+  function closeFrontmatter(){
+    fmEditor.classList.remove('open');
+    btnFrontmatter.setAttribute('aria-expanded','false');
+  }
+  fmAdd.addEventListener('click', () => {
+    const k = fmField.value.trim();
+    const v = fmValue.value.trim();
+    if (!k) return;
+    frontmatter[k] = v;
+    fmField.value = ''; fmValue.value = '';
+    renderFrontmatterList();
+  });
+  btnFrontmatter.addEventListener('click', (e) => { e.stopPropagation(); if (fmEditor.classList.contains('open')) closeFrontmatter(); else openFrontmatter(); });
+  fmClose.addEventListener('click', closeFrontmatter);
 
   // Formatting buttons
   btnUndo.addEventListener('click', () => {

@@ -116,6 +116,22 @@ body{
 .chart-builder .preview{border:1px solid var(--edge); border-radius:.3rem; padding:.4rem; min-height:60px; margin-bottom:.5rem}
 .chart-builder .actions{display:flex; justify-content:flex-end; gap:.5rem}
 
+/* Frontmatter editor */
+.frontmatter-wrap{position:relative}
+.frontmatter-editor{
+  position:absolute; top:2.6rem; left:0; border:1px solid var(--edge); background:var(--surface);
+  border-radius:.5rem; box-shadow:0 6px 24px rgba(0,0,0,.12); padding:.5rem; display:none; z-index:50; width:260px;
+}
+.frontmatter-editor.open{display:block}
+.frontmatter-editor .row{display:flex; gap:.5rem; margin-bottom:.5rem}
+.frontmatter-editor .row input{flex:1; padding:.3rem .4rem; border:1px solid var(--edge); border-radius:.3rem}
+.frontmatter-editor .row .add{padding:.3rem .5rem; border:1px solid var(--edge); background:#fff0; border-radius:.3rem; cursor:pointer}
+.frontmatter-editor .row .add:hover{background:var(--edge)}
+.frontmatter-editor ul{list-style:none; padding:0; margin:0 0 .5rem 0}
+.frontmatter-editor li{display:flex; justify-content:space-between; align-items:center; margin-bottom:.25rem}
+.frontmatter-editor li button{border:none; background:#fff0; cursor:pointer}
+.frontmatter-editor .actions{display:flex; justify-content:flex-end; gap:.5rem}
+
 /* Surface and editors */
 .surface{max-width:1100px; margin:1rem auto; padding:0 1rem}
 .editor{
