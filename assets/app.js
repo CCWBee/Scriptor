@@ -1,4 +1,4 @@
-// QuietMark editor
+// Scriptor editor
 (() => {
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
@@ -790,7 +790,7 @@
 
   // Public sample if user opens without a file
   const sample = [
-    '# QuietMark',
+    '# Scriptor',
     '',
     'Edit like normal text; export to Markdown when ready.',
     '',
