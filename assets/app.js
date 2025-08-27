@@ -107,10 +107,8 @@
 
     if (window.mermaid) {
       mermaid.initialize({ startOnLoad: false });
-    } else {
-      btnChart.disabled = true;
-      btnChart.setAttribute('aria-disabled', 'true');
     }
+    updateChartButtonState();
   } catch (err) {
     console.error(err);
     toast('Required libraries failed to load', 'warn');
@@ -245,7 +243,15 @@
   }
 
   function insertMermaidChart(definition) {
-    if (mode !== 'wysiwyg' || !definition) return;
+    if (!definition) return;
+    if (mode === 'source') {
+      const block = `\n\u0060\u0060\u0060mermaid\n${definition}\n\u0060\u0060\u0060\n`;
+      const { selectionStart, selectionEnd } = srcTA;
+      srcTA.setRangeText(block, selectionStart, selectionEnd, 'end');
+      srcTA.focus();
+      return;
+    }
+    if (mode !== 'wysiwyg') return;
     if (savedRange) {
       const sel = window.getSelection();
       sel.removeAllRanges();
@@ -402,6 +408,7 @@
   // Advanced toggle
   function toggleSource(forceToSource) {
     const toSource = typeof forceToSource === 'boolean' ? forceToSource : (mode === 'wysiwyg');
+    closeChartBuilder();
     if (toSource) {
       // html -> md -> textarea
       normaliseInlineTags();
@@ -425,6 +432,14 @@
       btnSource.setAttribute('aria-pressed', 'false');
       mode = 'wysiwyg';
     }
+    updateChartButtonState();
+  }
+
+  function updateChartButtonState() {
+    const disabled = (mode !== 'wysiwyg') || !window.mermaid;
+    btnChart.disabled = disabled;
+    btnChart.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    if (disabled) closeChartBuilder();
   }
 
   // Table picker build
@@ -567,9 +582,10 @@
     chartPreview.innerHTML = `<div class="mermaid">${code}</div>`;
     try{ mermaid.init(undefined, chartPreview.querySelector('.mermaid')); }catch(_){ }
   }
-  btnChart.addEventListener('mousedown', () => { if (mode !== 'wysiwyg') return; savedRange = getSelectionRange(); });
+  btnChart.addEventListener('mousedown', () => { if (btnChart.disabled) return; savedRange = getSelectionRange(); });
   btnChart.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (btnChart.disabled) return;
     if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
   });
   chartAdd.addEventListener('click', () => {
