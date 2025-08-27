@@ -29,6 +29,7 @@
   const chartBuilder = $('#chartBuilder');
   const chartDir = $('#chartDir');
   const chartNodes = $('#chartNodes');
+  const chartNodeTpl = $('#chartNodeTpl');
   const chartAdd = $('#chartAdd');
   const chartPreview = $('#chartPreview');
   const chartInsert = $('#chartInsert');
@@ -506,24 +507,55 @@
   }
   function addChartNode(text=''){
     const idx = chartNodes.children.length + 1;
-    const input = document.createElement('input');
-    input.type = 'text';
+    const row = chartNodeTpl.content.firstElementChild.cloneNode(true);
+    const input = row.querySelector('input');
+    const select = row.querySelector('select');
     input.placeholder = 'Step ' + idx;
     input.value = text;
     input.addEventListener('input', updateChartPreview);
-    chartNodes.appendChild(input);
+    select.addEventListener('change', updateChartPreview);
+    chartNodes.appendChild(row);
+    updateNodeOptions();
   }
-  function buildMermaidCode(){
-    const dir = chartDir.value;
-    const inputs = [...chartNodes.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
-    if (!inputs.length) return '';
+
+  function updateNodeOptions(){
+    const rows = [...chartNodes.children];
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    rows.forEach((row,i) => { row.dataset.id = letters[i]; });
+    rows.forEach((row,i) => {
+      const select = row.querySelector('select');
+      const prev = select.value;
+      select.innerHTML = '<option value="">None</option>';
+      rows.forEach((r,j) => {
+        if (i === j) return;
+        const opt = document.createElement('option');
+        opt.value = r.dataset.id;
+        opt.textContent = r.dataset.id;
+        select.appendChild(opt);
+      });
+      if ([...select.options].some(o => o.value === prev)) select.value = prev;
+    });
+  }
+
+  function buildMermaidCode(){
+    updateNodeOptions();
+    const dir = chartDir.value;
+    const rows = [...chartNodes.children];
+    const nodes = [];
+    const active = new Set();
+    rows.forEach(row => {
+      const label = row.querySelector('input').value.trim();
+      if (!label) return;
+      nodes.push({ id: row.dataset.id, label, row });
+      active.add(row.dataset.id);
+    });
+    if (!nodes.length) return '';
     let code = `graph ${dir}\n`;
-    for (let i=0;i<inputs.length;i++){
-      const id = letters[i];
-      code += `${id}["${inputs[i].replace(/"/g,'\\"')}"]\n`;
-      if (i < inputs.length-1) code += `${id}-->${letters[i+1]}\n`;
-    }
+    nodes.forEach(n => { code += `${n.id}["${n.label.replace(/"/g,'\\"')}"]\n`; });
+    nodes.forEach(n => {
+      const to = n.row.querySelector('select').value;
+      if (to && active.has(to)) code += `${n.id}-->${to}\n`;
+    });
     return code;
   }
   function updateChartPreview(){
@@ -537,7 +569,12 @@
     e.stopPropagation();
     if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
   });
-  chartAdd.addEventListener('click', () => { addChartNode(); updateChartPreview(); chartNodes.lastChild.focus(); });
+  chartAdd.addEventListener('click', () => {
+    addChartNode();
+    updateChartPreview();
+    const last = chartNodes.lastElementChild;
+    if (last) last.querySelector('input').focus();
+  });
   chartDir.addEventListener('change', updateChartPreview);
   chartInsert.addEventListener('click', () => { const code = buildMermaidCode(); if (code.trim()) insertMermaidChart(code); closeChartBuilder(); });
   chartCancel.addEventListener('click', closeChartBuilder);

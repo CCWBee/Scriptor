@@ -112,7 +112,10 @@ body{
 .chart-builder.open{display:block}
 .chart-builder .row{display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem}
 .chart-builder .nodes{display:flex; flex-direction:column; gap:.25rem; margin-bottom:.5rem}
-.chart-builder .nodes input{padding:.3rem .4rem; border:1px solid var(--edge); border-radius:.3rem}
+.chart-builder .node{display:flex; align-items:center; gap:.25rem}
+.chart-builder .node input{flex:1}
+.chart-builder .nodes input,.chart-builder .nodes select{padding:.3rem .4rem; border:1px solid var(--edge); border-radius:.3rem}
+.chart-builder .nodes select{width:5rem}
 .chart-builder .add{width:100%; padding:.3rem; margin-bottom:.5rem; border:1px solid var(--edge); background:#fff0; border-radius:.4rem; cursor:pointer}
 .chart-builder .add:hover{background:var(--edge)}
 .chart-builder .preview{border:1px solid var(--edge); border-radius:.3rem; padding:.4rem; min-height:60px; margin-bottom:.5rem}
