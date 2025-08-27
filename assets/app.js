@@ -524,16 +524,16 @@
     rows.forEach((row,i) => { row.dataset.id = letters[i]; });
     rows.forEach((row,i) => {
       const select = row.querySelector('select');
-      const prev = select.value;
-      select.innerHTML = '<option value="">None</option>';
+      const prev = [...select.selectedOptions].map(o => o.value);
+      select.innerHTML = '';
       rows.forEach((r,j) => {
         if (i === j) return;
         const opt = document.createElement('option');
         opt.value = r.dataset.id;
         opt.textContent = r.dataset.id;
+        if (prev.includes(opt.value)) opt.selected = true;
         select.appendChild(opt);
       });
-      if ([...select.options].some(o => o.value === prev)) select.value = prev;
     });
   }
 
@@ -553,8 +553,11 @@
     let code = `graph ${dir}\n`;
     nodes.forEach(n => { code += `${n.id}["${n.label.replace(/"/g,'\\"')}"]\n`; });
     nodes.forEach(n => {
-      const to = n.row.querySelector('select').value;
-      if (to && active.has(to)) code += `${n.id}-->${to}\n`;
+      const select = n.row.querySelector('select');
+      [...select.selectedOptions].forEach(opt => {
+        const to = opt.value;
+        if (to && active.has(to)) code += `${n.id}-->${to}\n`;
+      });
     });
     return code;
   }
