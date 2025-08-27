@@ -67,6 +67,9 @@
   let md, td;
   let savedRange = null;
   let frontmatter = {};
+  const DRAFT_KEY = 'draft';
+  let lastSavedMd = '';
+  let dirty = false;
 
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm) {
@@ -164,6 +167,30 @@
 
   function frontmatterToYAML(obj) {
     return Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join('\n');
+  }
+
+  function getCurrentMarkdown() {
+    let mdOut = '';
+    if (mode === 'source') {
+      mdOut = srcTA.value || '';
+    } else {
+      const clone = editor.cloneNode(true);
+      normaliseInlineTags(clone);
+      mdOut = td.turndown(clone.innerHTML);
+    }
+    const fmText = frontmatterToYAML(frontmatter);
+    if (fmText) mdOut = `---\n${fmText}\n---\n\n` + mdOut;
+    return mdOut;
+  }
+
+  function saveDraft(mdText) {
+    try { localStorage.setItem(DRAFT_KEY, mdText); } catch (_) {}
+    dirty = mdText !== lastSavedMd;
+  }
+
+  function handleInput() {
+    const mdText = getCurrentMarkdown();
+    saveDraft(mdText);
   }
 
   const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TD','TH']);
@@ -340,6 +367,8 @@
     a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
     toast('Exported ' + name, 'success');
+    lastSavedMd = mdOut;
+    saveDraft(mdOut);
   }
 
   function setTheme(theme){
@@ -366,6 +395,8 @@
       const txt = await f.text();
       currentFileName = f.name;
       renderMarkdownToEditor(txt, true);
+      lastSavedMd = txt;
+      saveDraft(txt);
       toast('Loaded ' + f.name, 'success');
       if (mode === 'source') toggleSource(false);
     } catch(err) {
@@ -394,6 +425,8 @@
       const txt = await f.text();
       currentFileName = f.name;
       renderMarkdownToEditor(txt, true);
+      lastSavedMd = txt;
+      saveDraft(txt);
       toast('Loaded ' + f.name, 'success');
       if (mode === 'source') toggleSource(false);
     }catch(err){
@@ -629,7 +662,7 @@
       const rm = document.createElement('button');
       rm.type = 'button';
       rm.textContent = '×';
-      rm.addEventListener('click', () => { delete frontmatter[k]; renderFrontmatterList(); });
+      rm.addEventListener('click', () => { delete frontmatter[k]; renderFrontmatterList(); handleInput(); });
       li.appendChild(span); li.appendChild(rm);
       fmList.appendChild(li);
     });
@@ -653,6 +686,7 @@
     frontmatter[k] = v;
     fmField.value = ''; fmValue.value = '';
     renderFrontmatterList();
+    handleInput();
   });
   btnFrontmatter.addEventListener('click', (e) => { e.stopPropagation(); if (fmEditor.classList.contains('open')) closeFrontmatter(); else openFrontmatter(); });
   fmClose.addEventListener('click', closeFrontmatter);
@@ -750,7 +784,8 @@
   });
 
   // Basic startup
-  editor.addEventListener('input', () => { /* keep DOM tidy */ });
+  editor.addEventListener('input', handleInput);
+  srcTA.addEventListener('input', handleInput);
   editor.addEventListener('blur', () => normaliseInlineTags());
 
   // Public sample if user opens without a file
@@ -773,6 +808,22 @@
     '',
     'Some **bold**, some _italic_, some ~~strike~~, and a [link](https://example.org).'
   ].join('\n');
-  renderMarkdownToEditor(sample);
+  const savedDraft = (() => { try { return localStorage.getItem(DRAFT_KEY); } catch (_) { return null; } })();
+  if (savedDraft) {
+    renderMarkdownToEditor(savedDraft);
+    lastSavedMd = savedDraft;
+    saveDraft(savedDraft);
+  } else {
+    renderMarkdownToEditor(sample);
+    lastSavedMd = sample;
+    saveDraft(sample);
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if (dirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
 
 })();
