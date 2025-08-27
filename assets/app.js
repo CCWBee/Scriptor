@@ -46,6 +46,7 @@
   const fmAdd = $('#fmAdd');
   const fmList = $('#fmList');
   const fmClose = $('#fmClose');
+  const statusBar = $('#statusBar');
 
   // Prevent toolbar clicks from moving editor focus across input types
   function keepEditorFocus(e) {
@@ -191,6 +192,9 @@
   function handleInput() {
     const mdText = getCurrentMarkdown();
     saveDraft(mdText);
+    const words = mdText.trim().split(/\s+/).filter(Boolean).length;
+    const chars = mdText.length;
+    statusBar.textContent = `${words} words • ${chars} chars`;
   }
 
   const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TD','TH']);
@@ -818,6 +822,8 @@
     lastSavedMd = sample;
     saveDraft(sample);
   }
+
+  handleInput();
 
   window.addEventListener('beforeunload', (e) => {
     if (dirty) {
