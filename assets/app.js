@@ -46,6 +46,7 @@
   const fmAdd = $('#fmAdd');
   const fmList = $('#fmList');
   const fmClose = $('#fmClose');
+  const statusBar = $('#statusBar');
 
   // Prevent toolbar clicks from moving editor focus across input types
   function keepEditorFocus(e) {
@@ -164,6 +165,15 @@
 
   function frontmatterToYAML(obj) {
     return Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join('\n');
+  }
+
+  function updateStatusBar() {
+    const mdText = mode === 'source'
+      ? (srcTA.value || '')
+      : td.turndown(editor.innerHTML);
+    const words = mdText.trim() ? mdText.trim().split(/\s+/).length : 0;
+    const chars = mdText.length;
+    statusBar.textContent = `${words} words, ${chars} chars`;
   }
 
   const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TD','TH']);
@@ -447,6 +457,7 @@
       btnSource.setAttribute('aria-pressed', 'false');
       mode = 'wysiwyg';
     }
+    updateStatusBar();
     updateChartButtonState();
   }
 
@@ -750,8 +761,12 @@
   });
 
   // Basic startup
-  editor.addEventListener('input', () => { /* keep DOM tidy */ });
+  editor.addEventListener('input', () => {
+    /* keep DOM tidy */
+    updateStatusBar();
+  });
   editor.addEventListener('blur', () => normaliseInlineTags());
+  srcTA.addEventListener('input', updateStatusBar);
 
   // Public sample if user opens without a file
   const sample = [
@@ -774,5 +789,6 @@
     'Some **bold**, some _italic_, some ~~strike~~, and a [link](https://example.org).'
   ].join('\n');
   renderMarkdownToEditor(sample);
+  updateStatusBar();
 
 })();

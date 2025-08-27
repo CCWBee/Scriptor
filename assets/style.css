@@ -262,6 +262,14 @@ table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
   font-size:.8rem;
 }
 
+#statusBar{
+  position:fixed;
+  bottom:.5rem;
+  right:1rem;
+  font-size:.8rem;
+  color:var(--muted);
+}
+
 @media (min-width:900px){
   body:not(.shortcuts-collapsed) #main{margin-right:220px}
 }
