@@ -252,11 +252,18 @@
       return;
     }
     if (mode !== 'wysiwyg') return;
+    const sel = window.getSelection();
     if (savedRange) {
-      const sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(savedRange);
       savedRange = null;
+    }
+    if (!editor.contains(sel.anchorNode)) {
+      const nr = document.createRange();
+      nr.selectNodeContents(editor);
+      nr.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(nr);
     }
     const div = document.createElement('div');
     div.className = 'mermaid';
@@ -272,6 +279,14 @@
     }
     div.removeAttribute('data-processed');
     if (window.mermaid) mermaid.init(undefined, div);
+    const blank = document.createElement('p');
+    blank.innerHTML = '<br>';
+    div.insertAdjacentElement('afterend', blank);
+    const nr = document.createRange();
+    nr.selectNodeContents(blank);
+    nr.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(nr);
   }
 
   function renderMarkdownToEditor(markdown, fromLoad=false) {
@@ -582,7 +597,9 @@
     chartPreview.innerHTML = `<div class="mermaid">${code}</div>`;
     try{ mermaid.init(undefined, chartPreview.querySelector('.mermaid')); }catch(_){ }
   }
-  btnChart.addEventListener('mousedown', () => { if (btnChart.disabled) return; savedRange = getSelectionRange(); });
+  const storeChartRange = () => { if (!btnChart.disabled) savedRange = getSelectionRange(); };
+  btnChart.addEventListener('mousedown', storeChartRange);
+  btnChart.addEventListener('click', storeChartRange);
   btnChart.addEventListener('click', (e) => {
     e.stopPropagation();
     if (btnChart.disabled) return;
@@ -595,7 +612,12 @@
     if (last) last.querySelector('input').focus();
   });
   chartDir.addEventListener('change', updateChartPreview);
-  chartInsert.addEventListener('click', () => { const code = buildMermaidCode(); if (code.trim()) insertMermaidChart(code); closeChartBuilder(); });
+  chartInsert.addEventListener('click', () => {
+    const code = buildMermaidCode().trim();
+    if (!code) { toast('Add at least one node', 'warn'); return; }
+    insertMermaidChart(code);
+    closeChartBuilder();
+  });
   chartCancel.addEventListener('click', closeChartBuilder);
 
   function renderFrontmatterList(){
