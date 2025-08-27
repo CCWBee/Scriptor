@@ -810,7 +810,27 @@
     '| Apples | 3 |',
     '| Pears | 5 |',
     '',
-    'Some **bold**, some _italic_, some ~~strike~~, and a [link](https://example.org).'
+    'Some **bold**, some _italic_, some ~~strike~~, and a [link](https://example.org).',
+    '',
+    '```mermaid',
+    'graph TD',
+    '  Start --> Stop',
+    '```',
+    '',
+    '```js',
+    'console.log("Hello, world!");',
+    '```',
+    '',
+    '> A wise quote.',
+    '',
+    '---',
+    '',
+    '- [ ] Task one',
+    '- [x] Task two',
+    '',
+    'Inline code: `const x = 42;`',
+    '',
+    '![Placeholder image](https://via.placeholder.com/150)'
   ].join('\n');
   const savedDraft = (() => { try { return localStorage.getItem(DRAFT_KEY); } catch (_) { return null; } })();
   if (savedDraft) {
