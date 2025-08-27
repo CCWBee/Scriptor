@@ -252,12 +252,14 @@
       sel.addRange(savedRange);
       savedRange = null;
     }
+    editor.focus();
     const div = document.createElement('div');
     div.className = 'mermaid';
     div.setAttribute('contenteditable', 'false');
     div.dataset.code = definition;
     div.textContent = definition;
-    const rng = getSelectionRange();
+    let rng = getSelectionRange();
+    if (rng && !editor.contains(rng.commonAncestorContainer)) rng = null;
     if (rng) {
       rng.deleteContents();
       rng.insertNode(div);
@@ -564,9 +566,13 @@
     chartPreview.innerHTML = `<div class="mermaid">${code}</div>`;
     try{ mermaid.init(undefined, chartPreview.querySelector('.mermaid')); }catch(_){ }
   }
-  btnChart.addEventListener('mousedown', () => { if (mode !== 'wysiwyg') return; savedRange = getSelectionRange(); });
+  btnChart.addEventListener('mousedown', () => {
+    if (mode !== 'wysiwyg') return;
+    savedRange = getSelectionRange();
+  });
   btnChart.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (!savedRange && mode === 'wysiwyg') savedRange = getSelectionRange();
     if (chartBuilder.classList.contains('open')) closeChartBuilder(); else openChartBuilder();
   });
   chartAdd.addEventListener('click', () => {
