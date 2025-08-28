@@ -11,6 +11,11 @@
   const dropZone = $('#dropZone');
   const btnLoad = $('#btnLoad');
   const exportMenu = $('#exportMenu');
+  const backendFormats = ['pdf','docx','html'];
+  backendFormats.forEach(fmt => {
+    const opt = exportMenu.querySelector(`option[value="${fmt}"]`);
+    if (opt) opt.disabled = true;
+  });
   const btnSource = $('#btnSource');
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
@@ -398,6 +403,19 @@
     });
     if (!res.ok) throw new Error('Conversion failed');
     return res.blob();
+  }
+
+  async function checkConvertEndpoint() {
+    try {
+      const res = await fetch('/api/convert', { method: 'OPTIONS' });
+      if (!res.ok) throw new Error('Unavailable');
+      backendFormats.forEach(fmt => {
+        const opt = exportMenu.querySelector(`option[value="${fmt}"]`);
+        if (opt) opt.disabled = false;
+      });
+    } catch (err) {
+      console.warn('Conversion endpoint unavailable');
+    }
   }
 
   function setTheme(theme){
@@ -891,6 +909,7 @@
   }
 
   handleInput();
+  checkConvertEndpoint();
 
   window.addEventListener('beforeunload', (e) => {
     if (dirty) {
