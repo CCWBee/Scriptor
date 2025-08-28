@@ -94,9 +94,13 @@
       <button id="btnLoad" class="btn" title="Upload .md file" aria-label="Upload">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Upload</span>
       </button>
-      <button id="btnExport" class="btn" title="Download Markdown" aria-label="Download">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#export"/></svg><span>Download</span>
-      </button>
+      <select id="exportMenu" class="btn" title="Export document" aria-label="Export">
+        <option value="" selected disabled>Export…</option>
+        <option value="md">Markdown</option>
+        <option value="pdf">PDF</option>
+        <option value="docx">DOCX</option>
+        <option value="html">HTML</option>
+      </select>
       <div class="frontmatter-wrap">
         <button id="btnFrontmatter" class="btn" title="Edit frontmatter" aria-expanded="false" aria-controls="frontmatterEditor" aria-label="Frontmatter">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Frontmatter</span>
@@ -140,7 +144,7 @@
       <li><kbd>Ctrl</kbd> + <kbd>1</kbd>–<kbd>4</kbd> Headings</li>
       <li><kbd>Ctrl</kbd> + <kbd>/</kbd> Advanced mode</li>
       <li><kbd>Ctrl</kbd> + <kbd>D</kbd> Dark mode</li>
-      <li><kbd>Ctrl</kbd> + <kbd>S</kbd> Download</li>
+      <li><kbd>Ctrl</kbd> + <kbd>S</kbd> Export (Markdown)</li>
     </ul>
   </aside>
 

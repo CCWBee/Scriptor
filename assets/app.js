@@ -10,7 +10,7 @@
   const imgInput = $('#imgInput');
   const dropZone = $('#dropZone');
   const btnLoad = $('#btnLoad');
-  const btnExport = $('#btnExport');
+  const exportMenu = $('#exportMenu');
   const btnSource = $('#btnSource');
   const btnBold = $('#btnBold');
   const btnItalic = $('#btnItalic');
@@ -349,7 +349,7 @@
     }
   }
 
-  function exportMarkdown() {
+  async function exportDocument(format = 'md') {
     let mdOut = '';
     if (mode === 'source') {
       mdOut = srcTA.value || '';
@@ -361,9 +361,26 @@
     const fmText = frontmatterToYAML(frontmatter);
     if (fmText) mdOut = `---\n${fmText}\n---\n\n` + mdOut;
     if (!mdOut.trim()) { toast('Nothing to export', 'warn'); return; }
-    let name = currentFileName || 'untitled.md';
-    if (!/\.md$/i.test(name)) name += '.md';
-    const blob = new Blob([mdOut], { type: 'text/markdown;charset=utf-8' });
+    let name = (currentFileName || 'untitled').replace(/\.[^.]+$/, '');
+    if (format === 'md') {
+      name += '.md';
+      const blob = new Blob([mdOut], { type: 'text/markdown;charset=utf-8' });
+      triggerDownload(blob, name);
+      lastSavedMd = mdOut;
+      saveDraft(mdOut);
+    } else {
+      name += '.' + format;
+      try {
+        const blob = await pandocConvert(mdOut, format);
+        triggerDownload(blob, name);
+      } catch (err) {
+        console.error(err);
+        toast('Conversion failed', 'warn');
+      }
+    }
+  }
+
+  function triggerDownload(blob, name) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = name;
@@ -371,8 +388,16 @@
     a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
     toast('Exported ' + name, 'success');
-    lastSavedMd = mdOut;
-    saveDraft(mdOut);
+  }
+
+  async function pandocConvert(markdown, format) {
+    const res = await fetch('/api/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markdown, format })
+    });
+    if (!res.ok) throw new Error('Conversion failed');
+    return res.blob();
   }
 
   function setTheme(theme){
@@ -764,7 +789,11 @@
   $$('.btn-h').forEach(b => b.addEventListener('click', () => { editor.focus(); applyHeading(+b.dataset.h); }));
 
   btnSource.addEventListener('click', () => toggleSource());
-  btnExport.addEventListener('click', exportMarkdown);
+  exportMenu.addEventListener('change', (e) => {
+    const fmt = e.target.value;
+    if (fmt) exportDocument(fmt);
+    e.target.selectedIndex = 0;
+  });
   toggleShortcuts.addEventListener('click', () => {
     const collapsed = shortcutsPanel.classList.toggle('collapsed');
     toggleShortcuts.setAttribute('aria-expanded', String(!collapsed));
@@ -784,7 +813,7 @@
     else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
     else if (k === '/'){ e.preventDefault(); toggleSource(); }
     else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
-    else if (k === 's'){ e.preventDefault(); exportMarkdown(); }
+    else if (k === 's'){ e.preventDefault(); exportDocument(exportMenu.value || 'md'); }
   });
 
   // Basic startup
