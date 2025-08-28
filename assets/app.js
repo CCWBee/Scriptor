@@ -457,6 +457,24 @@
     if (window.mermaid) mermaid.init(undefined, mer);
   });
 
+  editor.addEventListener('click', (e) => {
+    if (e.target.tagName === 'A' && (e.ctrlKey || e.metaKey)) {
+      window.open(e.target.href, '_blank');
+      e.preventDefault();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      editor.querySelectorAll('a').forEach(a => a.classList.add('ctrl-link'));
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (!e.ctrlKey && !e.metaKey) {
+      editor.querySelectorAll('a').forEach(a => a.classList.remove('ctrl-link'));
+    }
+  });
+
   // Advanced toggle
   function toggleSource(forceToSource) {
     const toSource = typeof forceToSource === 'boolean' ? forceToSource : (mode === 'wysiwyg');
