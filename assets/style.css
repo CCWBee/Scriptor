@@ -211,6 +211,7 @@ body{
 .editor em{font-style:italic}
 .editor s{opacity:.9; text-decoration: line-through}
 .editor a{color:var(--accent)}
+.editor a.ctrl-link{text-decoration:underline}
 .editor ul, .editor ol{padding-left:1.4rem}
 .editor table{
   border-collapse:collapse; width:100%; max-width:100%; margin:1rem 0;
