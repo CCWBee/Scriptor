@@ -11,83 +11,84 @@
 <body>
   <header class="ribbon" role="navigation" aria-label="Editor toolbar">
     <h1 class="visually-hidden">Scriptor</h1>
-    <nav role="toolbar" aria-label="Formatting">
+    <nav role="toolbar" aria-label="Editor toolbar">
       <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
       <input id="imgInput" type="file" accept="image/*" hidden>
-      <button id="btnUndo" class="btn" title="Undo  Ctrl or Cmd+Z" aria-label="Undo">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#undo"/></svg>
-      </button>
-      <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg>
-      </button>
-      <button id="btnItalic" class="btn" title="Italic  Ctrl or Cmd+I" aria-label="Italic">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#italic"/></svg>
-      </button>
-      <button id="btnStrike" class="btn" title="Strikethrough  Ctrl or Cmd+E" aria-label="Strikethrough">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#strike"/></svg>
-      </button>
-
-      <div class="sep" aria-hidden="true"></div>
-
-      <button data-h="1" class="btn btn-h" title="Heading 1  Ctrl or Cmd+1" aria-label="Heading 1">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h1"/></svg>
-      </button>
-      <button data-h="2" class="btn btn-h" title="Heading 2  Ctrl or Cmd+2" aria-label="Heading 2">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h2"/></svg>
-      </button>
-      <button data-h="3" class="btn btn-h" title="Heading 3  Ctrl or Cmd+3" aria-label="Heading 3">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h3"/></svg>
-      </button>
-      <button data-h="4" class="btn btn-h" title="Heading 4  Ctrl or Cmd+4" aria-label="Heading 4">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h4"/></svg>
-      </button>
-
-      <div class="sep" aria-hidden="true"></div>
-
-      <div class="table-wrap">
-        <button id="btnTable" class="btn" title="Insert table" aria-expanded="false" aria-controls="tablePicker" aria-label="Insert table">
-          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#table"/></svg>
+      <div class="btn-group" role="group" aria-label="Formatting">
+        <button id="btnUndo" class="btn" title="Undo  Ctrl or Cmd+Z" aria-label="Undo">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#undo"/></svg>
         </button>
-        <div id="tablePicker" class="table-picker" role="dialog" aria-modal="false" aria-label="Insert table size">
-          <div class="grid" aria-hidden="true"></div>
-          <div class="hint" id="tableHint">0 × 0</div>
-          <button class="close" title="Close  Esc" aria-label="Close">×</button>
-        </div>
+        <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg>
+        </button>
+        <button id="btnItalic" class="btn" title="Italic  Ctrl or Cmd+I" aria-label="Italic">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#italic"/></svg>
+        </button>
+        <button id="btnStrike" class="btn" title="Strikethrough  Ctrl or Cmd+E" aria-label="Strikethrough">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#strike"/></svg>
+        </button>
       </div>
-      <div class="chart-wrap">
-        <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
-          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
+
+      <div class="btn-group" role="group" aria-label="Headings">
+        <button data-h="1" class="btn btn-h" title="Heading 1  Ctrl or Cmd+1" aria-label="Heading 1">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h1"/></svg>
         </button>
-        <div id="chartBuilder" class="chart-builder" role="dialog" aria-modal="false" aria-label="Insert chart">
-          <div class="row">
-            <label for="chartDir">Direction</label>
-            <select id="chartDir">
-              <option value="TD">Top-down</option>
-              <option value="LR">Left-right</option>
-            </select>
+        <button data-h="2" class="btn btn-h" title="Heading 2  Ctrl or Cmd+2" aria-label="Heading 2">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h2"/></svg>
+        </button>
+        <button data-h="3" class="btn btn-h" title="Heading 3  Ctrl or Cmd+3" aria-label="Heading 3">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h3"/></svg>
+        </button>
+        <button data-h="4" class="btn btn-h" title="Heading 4  Ctrl or Cmd+4" aria-label="Heading 4">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h4"/></svg>
+        </button>
+      </div>
+
+      <div class="btn-group" role="group" aria-label="Insertions">
+        <div class="table-wrap">
+          <button id="btnTable" class="btn" title="Insert table" aria-expanded="false" aria-controls="tablePicker" aria-label="Insert table">
+            <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#table"/></svg>
+          </button>
+          <div id="tablePicker" class="table-picker" role="dialog" aria-modal="false" aria-label="Insert table size">
+            <div class="grid" aria-hidden="true"></div>
+            <div class="hint" id="tableHint">0 × 0</div>
+            <button class="close" title="Close  Esc" aria-label="Close">×</button>
           </div>
-          <div id="chartNodes" class="nodes"></div>
-          <template id="chartNodeTpl">
-            <div class="node">
-              <input type="text">
-              <select multiple size="3"></select>
+        </div>
+        <div class="chart-wrap">
+          <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
+            <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
+          </button>
+          <div id="chartBuilder" class="chart-builder" role="dialog" aria-modal="false" aria-label="Insert chart">
+            <div class="row">
+              <label for="chartDir">Direction</label>
+              <select id="chartDir">
+                <option value="TD">Top-down</option>
+                <option value="LR">Left-right</option>
+              </select>
             </div>
-          </template>
-          <button id="chartAdd" class="add" type="button">Add step</button>
-          <div id="chartPreview" class="preview"></div>
-          <div class="actions">
-            <button id="chartInsert" type="button" class="btn">Insert</button>
-            <button id="chartCancel" type="button" class="btn">Close</button>
+            <div id="chartNodes" class="nodes"></div>
+            <template id="chartNodeTpl">
+              <div class="node">
+                <input type="text">
+                <select multiple size="3"></select>
+              </div>
+            </template>
+            <button id="chartAdd" class="add" type="button">Add step</button>
+            <div id="chartPreview" class="preview"></div>
+            <div class="actions">
+              <button id="chartInsert" type="button" class="btn">Insert</button>
+              <button id="chartCancel" type="button" class="btn">Close</button>
+            </div>
           </div>
         </div>
+        <button id="btnImage" class="btn" title="Insert image" aria-label="Insert image">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
+        </button>
+        <button id="btnLink" class="btn" title="Insert link" aria-label="Insert link">
+          <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#link"/></svg>
+        </button>
       </div>
-
-      <button id="btnImage" class="btn" title="Insert image" aria-label="Insert image">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
-      </button>
-      <button id="btnLink" class="btn" title="Insert link" aria-label="Insert link">
-        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#link"/></svg>
-      </button>
 
       <span class="spacer" aria-hidden="true"></span>
 
