@@ -53,6 +53,60 @@
   const fmClose = $('#fmClose');
   const statusBar = $('#statusBar');
 
+  // Tooltips
+  const tooltipDelay = 500;
+  let tooltipTimer = null;
+  let hideTooltipTimer = null;
+  let tooltipBox = null;
+  let tooltipOwner = null;
+
+  function initTooltips() {
+    $$('[title]').forEach(el => {
+      el.dataset.tip = el.getAttribute('title');
+      el.removeAttribute('title');
+      el.addEventListener('pointerenter', showTooltip);
+      el.addEventListener('pointerleave', hideTooltip);
+      el.addEventListener('focus', showTooltip);
+      el.addEventListener('blur', hideTooltip);
+    });
+  }
+
+  function showTooltip(e) {
+    const target = e.currentTarget;
+    clearTimeout(hideTooltipTimer);
+    const reveal = () => {
+      if (!tooltipBox) {
+        tooltipBox = document.createElement('div');
+        tooltipBox.className = 'tooltip';
+        document.body.appendChild(tooltipBox);
+      }
+      tooltipBox.textContent = target.dataset.tip;
+      const rect = target.getBoundingClientRect();
+      tooltipBox.style.left = window.scrollX + rect.left + rect.width / 2 + 'px';
+      tooltipBox.style.top = window.scrollY + rect.top + 'px';
+      tooltipBox.style.transform = 'translate(-50%, calc(-100% - 8px))';
+      tooltipBox.style.transition = tooltipOwner ? 'none' : '';
+      tooltipBox.classList.add('show');
+      tooltipOwner = target;
+    };
+    if (tooltipOwner) {
+      reveal();
+    } else {
+      tooltipTimer = setTimeout(reveal, tooltipDelay);
+    }
+  }
+
+  function hideTooltip() {
+    clearTimeout(tooltipTimer);
+    hideTooltipTimer = setTimeout(() => {
+      if (tooltipBox) tooltipBox.classList.remove('show');
+      if (tooltipBox) tooltipBox.style.transition = '';
+      tooltipOwner = null;
+    }, 100);
+  }
+
+  initTooltips();
+
   // Prevent toolbar clicks from moving editor focus across input types
   function keepEditorFocus(e) {
     if (e.target.closest('button')) e.preventDefault();
