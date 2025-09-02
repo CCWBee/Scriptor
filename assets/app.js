@@ -77,8 +77,8 @@
       tooltipBox.textContent = target.dataset.tip;
       const rect = target.getBoundingClientRect();
       tooltipBox.style.left = window.scrollX + rect.left + rect.width / 2 + 'px';
-      tooltipBox.style.top = window.scrollY + rect.top + 'px';
-      tooltipBox.style.transform = 'translate(-50%, calc(-100% - 8px))';
+      tooltipBox.style.top = window.scrollY + rect.bottom + 'px';
+      tooltipBox.style.transform = 'translate(-50%, 8px)';
       tooltipBox.style.transition = tooltipOwner ? 'none' : '';
       tooltipBox.classList.add('show');
       tooltipOwner = target;
