@@ -15,48 +15,48 @@
       <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
       <input id="imgInput" type="file" accept="image/*" hidden>
       <div class="btn-group" role="group" aria-label="Formatting">
-        <button id="btnUndo" class="btn" title="Undo  Ctrl or Cmd+Z" aria-label="Undo">
+        <button id="btnUndo" class="btn" data-tip="Undo  Ctrl or Cmd+Z" aria-label="Undo">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#undo"/></svg>
         </button>
-        <button id="btnBold" class="btn" title="Bold  Ctrl or Cmd+B" aria-label="Bold">
+        <button id="btnBold" class="btn" data-tip="Bold  Ctrl or Cmd+B" aria-label="Bold">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#bold"/></svg>
         </button>
-        <button id="btnItalic" class="btn" title="Italic  Ctrl or Cmd+I" aria-label="Italic">
+        <button id="btnItalic" class="btn" data-tip="Italic  Ctrl or Cmd+I" aria-label="Italic">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#italic"/></svg>
         </button>
-        <button id="btnStrike" class="btn" title="Strikethrough  Ctrl or Cmd+E" aria-label="Strikethrough">
+        <button id="btnStrike" class="btn" data-tip="Strikethrough  Ctrl or Cmd+E" aria-label="Strikethrough">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#strike"/></svg>
         </button>
       </div>
 
       <div class="btn-group" role="group" aria-label="Headings">
-        <button data-h="1" class="btn btn-h" title="Heading 1  Ctrl or Cmd+1" aria-label="Heading 1">
+        <button data-h="1" class="btn btn-h" data-tip="Heading 1  Ctrl or Cmd+1" aria-label="Heading 1">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h1"/></svg>
         </button>
-        <button data-h="2" class="btn btn-h" title="Heading 2  Ctrl or Cmd+2" aria-label="Heading 2">
+        <button data-h="2" class="btn btn-h" data-tip="Heading 2  Ctrl or Cmd+2" aria-label="Heading 2">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h2"/></svg>
         </button>
-        <button data-h="3" class="btn btn-h" title="Heading 3  Ctrl or Cmd+3" aria-label="Heading 3">
+        <button data-h="3" class="btn btn-h" data-tip="Heading 3  Ctrl or Cmd+3" aria-label="Heading 3">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h3"/></svg>
         </button>
-        <button data-h="4" class="btn btn-h" title="Heading 4  Ctrl or Cmd+4" aria-label="Heading 4">
+        <button data-h="4" class="btn btn-h" data-tip="Heading 4  Ctrl or Cmd+4" aria-label="Heading 4">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h4"/></svg>
         </button>
       </div>
 
       <div class="btn-group" role="group" aria-label="Insertions">
         <div class="table-wrap">
-          <button id="btnTable" class="btn" title="Insert table" aria-expanded="false" aria-controls="tablePicker" aria-label="Insert table">
+          <button id="btnTable" class="btn" data-tip="Insert table" aria-expanded="false" aria-controls="tablePicker" aria-label="Insert table">
             <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#table"/></svg>
           </button>
           <div id="tablePicker" class="table-picker" role="dialog" aria-modal="false" aria-label="Insert table size">
             <div class="grid" aria-hidden="true"></div>
             <div class="hint" id="tableHint">0 × 0</div>
-            <button class="close" title="Close  Esc" aria-label="Close">×</button>
+            <button class="close" data-tip="Close  Esc" aria-label="Close">×</button>
           </div>
         </div>
         <div class="chart-wrap">
-          <button id="btnChart" class="btn" title="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
+          <button id="btnChart" class="btn" data-tip="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
             <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
           </button>
           <div id="chartBuilder" class="chart-builder" role="dialog" aria-modal="false" aria-label="Insert chart">
@@ -82,20 +82,20 @@
             </div>
           </div>
         </div>
-        <button id="btnImage" class="btn" title="Insert image" aria-label="Insert image">
+        <button id="btnImage" class="btn" data-tip="Insert image" aria-label="Insert image">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
         </button>
-        <button id="btnLink" class="btn" title="Insert link" aria-label="Insert link">
+        <button id="btnLink" class="btn" data-tip="Insert link" aria-label="Insert link">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#link"/></svg>
         </button>
       </div>
 
       <span class="spacer" aria-hidden="true"></span>
 
-      <button id="btnLoad" class="btn" title="Open .md file" aria-label="Open">
+      <button id="btnLoad" class="btn" data-tip="Open .md file" aria-label="Open">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Open</span>
       </button>
-      <select id="exportMenu" class="btn" title="Export document" aria-label="Export">
+      <select id="exportMenu" class="btn" data-tip="Export document" aria-label="Export">
         <option value="" selected disabled>Export…</option>
         <option value="md">Markdown</option>
         <option value="pdf">PDF</option>
@@ -103,7 +103,7 @@
         <option value="html">HTML</option>
       </select>
       <div class="frontmatter-wrap">
-        <button id="btnFrontmatter" class="btn" title="Edit frontmatter" aria-expanded="false" aria-controls="frontmatterEditor" aria-label="Frontmatter">
+        <button id="btnFrontmatter" class="btn" data-tip="Edit frontmatter" aria-expanded="false" aria-controls="frontmatterEditor" aria-label="Frontmatter">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Frontmatter</span>
         </button>
         <div id="frontmatterEditor" class="frontmatter-editor" role="dialog" aria-modal="false" aria-label="Edit frontmatter">
@@ -118,7 +118,7 @@
           </div>
         </div>
       </div>
-      <button id="btnSource" class="btn" title="Toggle advanced mode  Ctrl or Cmd+/" aria-pressed="false" aria-label="Advanced">
+      <button id="btnSource" class="btn" data-tip="Toggle advanced mode  Ctrl or Cmd+/" aria-pressed="false" aria-label="Advanced">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#code"/></svg><span>Advanced</span>
       </button>
     </nav>

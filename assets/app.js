@@ -60,19 +60,7 @@
   let tooltipBox = null;
   let tooltipOwner = null;
 
-  function initTooltips() {
-    $$('[title]').forEach(el => {
-      el.dataset.tip = el.getAttribute('title');
-      el.removeAttribute('title');
-      el.addEventListener('pointerenter', showTooltip);
-      el.addEventListener('pointerleave', hideTooltip);
-      el.addEventListener('focus', showTooltip);
-      el.addEventListener('blur', hideTooltip);
-    });
-  }
-
-  function showTooltip(e) {
-    const target = e.currentTarget;
+  function showTooltip(target) {
     clearTimeout(hideTooltipTimer);
     const reveal = () => {
       if (!tooltipBox) {
@@ -105,7 +93,22 @@
     }, 100);
   }
 
-  initTooltips();
+  function handleTooltipEnter(e) {
+    const target = e.target.closest('[data-tip]');
+    if (!target) return;
+    showTooltip(target);
+  }
+
+  function handleTooltipLeave(e) {
+    const target = e.target.closest('[data-tip]');
+    if (!target || target !== tooltipOwner) return;
+    hideTooltip();
+  }
+
+  document.addEventListener('pointerenter', handleTooltipEnter, true);
+  document.addEventListener('focus', handleTooltipEnter, true);
+  document.addEventListener('pointerleave', handleTooltipLeave, true);
+  document.addEventListener('blur', handleTooltipLeave, true);
 
   // Prevent toolbar clicks from moving editor focus across input types
   function keepEditorFocus(e) {
