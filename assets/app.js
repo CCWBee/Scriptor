@@ -1,9 +1,11 @@
-// Scriptor editor
+// Core client-side logic for the Scriptor Markdown editor
 (() => {
+  // Convenience DOM helpers
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-  // Elements
+  // Grab all of the frequently used elements up front so the rest of the
+  // code can refer to them without repeatedly querying the DOM.
   const editor = $('#editor');
   const srcTA = $('#source');
   const fileInput = $('#fileInput');
@@ -11,6 +13,8 @@
   const dropZone = $('#dropZone');
   const btnLoad = $('#btnLoad');
   const exportMenu = $('#exportMenu');
+  // Only the backend understands these formats; the options get disabled until
+  // the server confirms support.
   const backendFormats = ['pdf','docx','html'];
   backendFormats.forEach(fmt => {
     const opt = exportMenu.querySelector(`option[value="${fmt}"]`);
@@ -53,7 +57,9 @@
   const fmClose = $('#fmClose');
   const statusBar = $('#statusBar');
 
-  // Tooltips
+  // ---------------------------------------------------------------------------
+  // Tooltip handling
+  // ---------------------------------------------------------------------------
   const tooltipDelay = 500;
   let tooltipTimer = null;
   let hideTooltipTimer = null;
@@ -117,22 +123,29 @@
   ribbon.addEventListener('pointerdown', keepEditorFocus);
   ribbon.addEventListener('mousedown', keepEditorFocus);
 
+  // Show a temporary message in the bottom-right corner
   function toast(msg, cls = '') {
     const el = document.createElement('div');
     el.className = 'toast ' + cls;
     el.textContent = msg;
     toasts.appendChild(el);
-    setTimeout(() => { el.classList.add('fade'); el.addEventListener('transitionend', () => el.remove(), { once:true }); }, 2400);
+    setTimeout(() => {
+      el.classList.add('fade');
+      el.addEventListener('transitionend', () => el.remove(), { once:true });
+    }, 2400);
   }
 
+  // ---------------------------------------------------------------------------
+  // Application state variables
+  // ---------------------------------------------------------------------------
   let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
   let currentFileName = 'untitled.md';
-  let md, td;
-  let savedRange = null;
-  let frontmatter = {};
-  const DRAFT_KEY = 'draft';
+  let md, td; // markdown-it and turndown instances
+  let savedRange = null; // caret position when switching views
+  let frontmatter = {}; // YAML frontmatter data
+  const DRAFT_KEY = 'draft'; // localStorage key for unsaved work
   let lastSavedMd = '';
-  let dirty = false;
+  let dirty = false; // whether there are unsaved changes
   let scrollPos = 0;
 
   try {
