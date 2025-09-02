@@ -107,14 +107,15 @@
 
   function handleTooltipLeave(e) {
     const target = e.target.closest('[data-tip]');
+    if (tooltipOwner && tooltipOwner.contains(e.relatedTarget)) return;
     if (!target || target !== tooltipOwner) return;
     hideTooltip();
   }
 
-  document.addEventListener('pointerenter', handleTooltipEnter, true);
-  document.addEventListener('focus', handleTooltipEnter, true);
-  document.addEventListener('pointerleave', handleTooltipLeave, true);
-  document.addEventListener('blur', handleTooltipLeave, true);
+  document.addEventListener('pointerover', handleTooltipEnter);
+  document.addEventListener('focusin', handleTooltipEnter);
+  document.addEventListener('pointerout', handleTooltipLeave);
+  document.addEventListener('focusout', handleTooltipLeave);
 
   // Prevent toolbar clicks from moving editor focus across input types
   function keepEditorFocus(e) {
