@@ -90,8 +90,10 @@ body{
   .btn[aria-pressed="true"]{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
   .table-picker .close:hover{background:color-mix(in srgb, var(--surface) 92%, var(--edge) 8%)}
 }
+.btn-group{display:inline-flex; border:1px solid var(--edge); border-radius:.5rem; overflow:hidden}
+.btn-group .btn{border:none; border-radius:0}
+.btn-group > *:not(:last-child){border-right:1px solid var(--edge)}
 .ico{width:18px; height:18px; display:inline-block}
-.sep{width:1px; height:26px; background:var(--edge); margin:0 .25rem}
 .spacer{flex:1 1 auto}
 
 /* Tooltips */
