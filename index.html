@@ -1,19 +1,27 @@
 <!doctype html>
+<!-- Main page for the Scriptor Markdown editor -->
 <html lang="en-GB" data-theme="light">
 <head>
   <meta charset="utf-8">
+  <!-- Make the UI responsive on phones -->
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Scriptor — Markdown editor">
   <title>Scriptor — Markdown editor</title>
+  <!-- Global stylesheet and favicon -->
   <link rel="stylesheet" href="assets/style.css">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
+  <!-- Sticky toolbar at the top of the page -->
   <header class="ribbon" role="navigation" aria-label="Editor toolbar">
     <h1 class="visually-hidden">Scriptor</h1>
+    <!-- Groups of buttons that act like a word processor toolbar -->
     <nav role="toolbar" aria-label="Editor toolbar">
+      <!-- Hidden inputs used to load files and images -->
       <input id="fileInput" type="file" accept=".md,text/markdown,text/plain" hidden>
       <input id="imgInput" type="file" accept="image/*" hidden>
+
+      <!-- Undo/formatting buttons -->
       <div class="btn-group" role="group" aria-label="Formatting">
         <button id="btnUndo" class="btn" data-tip="Undo  Ctrl or Cmd+Z" aria-label="Undo">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#undo"/></svg>
@@ -29,6 +37,7 @@
         </button>
       </div>
 
+      <!-- Heading level shortcuts -->
       <div class="btn-group" role="group" aria-label="Headings">
         <button data-h="1" class="btn btn-h" data-tip="Heading 1  Ctrl or Cmd+1" aria-label="Heading 1">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#h1"/></svg>
@@ -44,8 +53,10 @@
         </button>
       </div>
 
+      <!-- Buttons that insert more complex content like tables or charts -->
       <div class="btn-group" role="group" aria-label="Insertions">
         <div class="table-wrap">
+          <!-- Table picker dialog -->
           <button id="btnTable" class="btn" data-tip="Insert table" aria-expanded="false" aria-controls="tablePicker" aria-label="Insert table">
             <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#table"/></svg>
           </button>
@@ -56,6 +67,7 @@
           </div>
         </div>
         <div class="chart-wrap">
+          <!-- Simple interface for building Mermaid diagrams -->
           <button id="btnChart" class="btn" data-tip="Insert Mermaid chart" aria-expanded="false" aria-controls="chartBuilder" aria-label="Insert chart">
             <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#chart"/></svg>
           </button>
@@ -82,6 +94,7 @@
             </div>
           </div>
         </div>
+        <!-- Shortcut buttons for images and links -->
         <button id="btnImage" class="btn" data-tip="Insert image" aria-label="Insert image">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#image"/></svg>
         </button>
@@ -92,6 +105,7 @@
 
       <span class="spacer" aria-hidden="true"></span>
 
+      <!-- File operations and export menu -->
       <button id="btnLoad" class="btn" data-tip="Open .md file" aria-label="Open">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Open</span>
       </button>
@@ -102,6 +116,7 @@
         <option value="docx">DOCX</option>
         <option value="html">HTML</option>
       </select>
+      <!-- YAML frontmatter editor -->
       <div class="frontmatter-wrap">
         <button id="btnFrontmatter" class="btn" data-tip="Edit frontmatter" aria-expanded="false" aria-controls="frontmatterEditor" aria-label="Frontmatter">
           <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Frontmatter</span>
@@ -118,12 +133,14 @@
           </div>
         </div>
       </div>
+      <!-- Toggle between WYSIWYG and raw Markdown source -->
       <button id="btnSource" class="btn" data-tip="Toggle advanced mode  Ctrl or Cmd+/" aria-pressed="false" aria-label="Advanced">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#code"/></svg><span>Advanced</span>
       </button>
     </nav>
   </header>
 
+  <!-- Main editor area -->
   <main id="main">
     <section id="dropZone" class="surface" aria-label="Editor area">
       <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true"></div>
@@ -132,6 +149,7 @@
     <div id="statusBar"></div>
   </main>
 
+  <!-- Always-visible list of keyboard shortcuts -->
   <aside id="shortcuts" class="shortcuts" aria-label="Keyboard shortcuts">
     <button id="toggleShortcuts" class="toggle" aria-expanded="true" aria-label="Hide shortcuts">×</button>
     <h2>Shortcuts</h2>
@@ -149,17 +167,18 @@
     </ul>
   </aside>
 
+  <!-- Toast container where short messages appear -->
   <div id="toasts" class="toasts" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Polyfills -->
+    <!-- Polyfills for older browsers -->
     <script defer src="assets/polyfills.js"></script>
-    <!-- Vendor libs -->
+    <!-- Vendor libraries that power the editor -->
     <script defer src="assets/vendor/markdown-it.min.js"></script>
     <script defer src="assets/vendor/purify.min.js"></script>
     <script defer src="assets/vendor/turndown.js"></script>
     <script defer src="assets/vendor/turndown-plugin-gfm.js"></script>
     <script defer src="assets/vendor/mermaid.min.js"></script>
-  <!-- App -->
+  <!-- Application logic -->
   <script defer src="assets/app.js"></script>
 
   <noscript>This editor needs JavaScript enabled.</noscript>

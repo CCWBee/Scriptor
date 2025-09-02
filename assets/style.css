@@ -1,4 +1,7 @@
-/* Quiet, accessible UI */
+/* Main stylesheet for the Scriptor editor.
+   The goal is a quiet, accessible UI that works in light and dark modes. */
+
+/* Base color variables that apply to both themes */
 :root{
   --bg: #ffffff;
   --fg: #0f172a;
@@ -12,6 +15,7 @@
   --surface: #ffffff;
 }
 
+/* Light theme overrides */
 :root[data-theme="light"]{
   --bg: #ffffff;
   --fg: #0f172a;
@@ -25,6 +29,7 @@
   --surface: #ffffff;
 }
 
+/* Dark theme overrides */
 :root[data-theme="dark"]{
   --bg: #0b1020;
   --fg: #e5e7eb;
