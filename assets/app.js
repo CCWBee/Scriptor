@@ -130,6 +130,7 @@
   const DRAFT_KEY = 'draft';
   let lastSavedMd = '';
   let dirty = false;
+  let scrollPos = 0;
 
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm) {
@@ -578,6 +579,7 @@
     closeChartBuilder();
     if (toSource) {
       // html -> md -> textarea
+      scrollPos = window.scrollY;
       normaliseInlineTags();
       const html = editor.innerHTML;
       let mdOut = td.turndown(html);
@@ -586,16 +588,20 @@
       srcTA.value = mdOut;
       editor.style.display = 'none';
       srcTA.style.display = 'block';
-      srcTA.focus();
+      srcTA.scrollTop = scrollPos;
+      srcTA.focus({ preventScroll: true });
+      window.scrollTo(0, scrollPos);
       btnSource.setAttribute('aria-pressed', 'true');
       mode = 'source';
     } else {
       // textarea -> html
+      scrollPos = srcTA.scrollTop;
       const mdIn = srcTA.value || '';
       renderMarkdownToEditor(mdIn);
       srcTA.style.display = 'none';
       editor.style.display = 'block';
-      editor.focus();
+      editor.focus({ preventScroll: true });
+      window.scrollTo(0, scrollPos);
       btnSource.setAttribute('aria-pressed', 'false');
       mode = 'wysiwyg';
     }
