@@ -13,7 +13,7 @@
     <path fill="currentColor" d="M12 5V2L7 7l5 5V9c3.31 0 6 2.69 6 6 0 .34-.03.67-.07 1h2.02c.03-.33.05-.66.05-1 0-4.97-4.03-9-9-9z"/>
   </symbol>
   <symbol id="bold" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M7 4h6a4 4 0 010 8H7zM7 12h7a4 4 0 010 8H7z"/>
+    <path fill="currentColor" d="M7 4h4v16H7zM11 4h2a4 4 0 010 8h-2zM11 12h2a4 4 0 010 8h-2z"/>
   </symbol>
   <symbol id="italic" viewBox="0 0 24 24">
     <path fill="currentColor" d="M10 4h8v2h-3.6l-3.8 12H16v2H8v-2h3.6l3.8-12H10z"/>
