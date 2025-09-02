@@ -60,7 +60,7 @@
   // ---------------------------------------------------------------------------
   // Tooltip handling
   // ---------------------------------------------------------------------------
-  const tooltipDelay = 500;
+  const tooltipDelay = 300;
   let tooltipTimer = null;
   let hideTooltipTimer = null;
   let tooltipBox = null;
@@ -106,8 +106,9 @@
   }
 
   function handleTooltipLeave(e) {
-    const target = e.target.closest('[data-tip]');
+    // Ignore pointer transitions within the current tooltip owner
     if (tooltipOwner && tooltipOwner.contains(e.relatedTarget)) return;
+    const target = e.target.closest('[data-tip]');
     if (!target || target !== tooltipOwner) return;
     hideTooltip();
   }
