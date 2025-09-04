@@ -154,6 +154,7 @@ const LintUI = (() => {
       }
     }
 
+    issues.sort((a, b) => a.from - b.from);
     renderPanel(issues, opts);
     highlight(container, issues);
   }
@@ -202,7 +203,6 @@ const LintUI = (() => {
   function highlight(container, issues){
     if(!container || !issues) return;
 
-    issues.sort((a, b) => a.from - b.from);
     let map = normalizeText(container).map;
 
     issues.forEach((iss, i) => {
