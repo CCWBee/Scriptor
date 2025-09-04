@@ -13,6 +13,7 @@
 #lint-list { overflow: auto; padding: 8px 0; }
 .lint-item { padding: 8px 12px; border-bottom: 1px solid var(--edge); cursor: pointer; }
 .lint-item:hover { background: var(--edge); }
+.lint-item.selected { background: var(--accent); color: var(--surface); }
 .lint-item .loc { opacity: .7; font-size: 12px; }
 .lint-tag { display: inline-block; padding: 0 6px; margin-right: 6px; border-radius: 3px; font-size: 11px; }
 .tag-error { background: var(--warn); }
@@ -24,6 +25,7 @@
 .lint-error { text-decoration-color: var(--warn); }
 .lint-warn  { text-decoration-color: var(--accent-2); }
 .lint-info  { text-decoration-color: var(--accent); }
+.lint-underline.active { background: var(--accent); color: var(--surface); }
 
 /* tooltip */
 #lint-tip {

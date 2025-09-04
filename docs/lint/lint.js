@@ -79,9 +79,11 @@ const LintUI = (() => {
     issues.forEach((iss, i) => {
       const item = document.createElement('div');
       item.className = 'lint-item';
+      item.dataset.issue = i;
       item.innerHTML = `<span class="lint-tag tag-${iss.type}">${iss.type}</span>${escapeHtml(iss.message)}<div class="loc">${iss.from}-${iss.to}</div>`;
       item.addEventListener('click', () => {
         if(typeof opts.jumpTo === 'function') opts.jumpTo(iss.from, iss.to);
+        activateIssue(i);
       });
       item.addEventListener('mouseenter', e => {
         tip.textContent = iss.message;
@@ -112,7 +114,7 @@ const LintUI = (() => {
     const nodes = [];
     while(walker.nextNode()) nodes.push(walker.currentNode);
 
-    issues.forEach(iss => {
+    issues.forEach((iss, i) => {
       let start = iss.from, end = iss.to, count = 0;
       for(const node of nodes){
         const len = node.textContent.length;
@@ -128,8 +130,29 @@ const LintUI = (() => {
         range.setEnd(node, e);
         const span = document.createElement('span');
         span.className = `lint-underline lint-${iss.type}`;
+        span.dataset.issue = i;
+        span.addEventListener('click', () => activateIssue(i));
+        span.addEventListener('mouseenter', () => activateIssue(i));
         range.surroundContents(span);
         break;
+      }
+    });
+  }
+
+  function activateIssue(id){
+    document.querySelectorAll('.lint-item').forEach(it => {
+      if(it.dataset.issue == id){
+        it.classList.add('selected');
+        it.scrollIntoView({block: 'nearest'});
+      } else {
+        it.classList.remove('selected');
+      }
+    });
+    document.querySelectorAll('.lint-underline').forEach(sp => {
+      if(sp.dataset.issue == id){
+        sp.classList.add('active');
+      } else {
+        sp.classList.remove('active');
       }
     });
   }
