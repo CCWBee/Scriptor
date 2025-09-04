@@ -3,6 +3,7 @@
 /* Scriptor IDs */
 const MD_INPUT   = document.querySelector("#source");   // raw markdown source
 const PREVIEW_EL = document.querySelector("#editor");   // rendered editor
+const BTN_CHECK  = document.querySelector("#btnCheck"); // toolbar button
 
 function getMarkdown(){
   if(MD_INPUT) return MD_INPUT.value;
@@ -16,11 +17,8 @@ function jumpTo(from, to){
   MD_INPUT.scrollTop = MD_INPUT.scrollHeight * (from / MD_INPUT.value.length);
 }
 
-function addLintButton(){
-  const btn = document.createElement("button");
-  btn.textContent = "Run lint";
-  btn.style.cssText = "position:fixed;right:360px;top:10px;z-index:10000;padding:6px 10px";
-  btn.onclick = () => LintUI.run({
+function runLint(){
+  LintUI.run({
     getMarkdown,
     container: PREVIEW_EL || document.body,
     jumpTo,
@@ -35,17 +33,16 @@ function addLintButton(){
       extraStopTerms: ["FSB","IB","TCB","ANLA","PII","RAE"]
     }
   });
-  document.body.appendChild(btn);
 }
 
-document.addEventListener("DOMContentLoaded", addLintButton);
+if(BTN_CHECK){
+  BTN_CHECK.addEventListener("click", runLint);
+}
 
 if(MD_INPUT){
   let t = null;
   MD_INPUT.addEventListener("input", () => {
     clearTimeout(t);
-    t = setTimeout(() => {
-      LintUI.run({ getMarkdown, container: PREVIEW_EL || document.body, jumpTo });
-    }, 1000);
+    t = setTimeout(runLint, 1000);
   });
 }
