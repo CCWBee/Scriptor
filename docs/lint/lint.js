@@ -40,10 +40,18 @@ const LintUI = (() => {
     }
 
     // Banned phrases
-    for(const [phrase, hint] of Object.entries(cfg.bannedPhrases)){
+    for(const [phrase, data] of Object.entries(cfg.bannedPhrases)){
+      let hint, wholeWord = true;
+      if(typeof data === 'string'){
+        hint = data;
+      } else {
+        hint = data && data.hint || '';
+        if(data && data.wholeWord === false) wholeWord = false;
+      }
       // Escape special regex characters so phrases are matched literally
       const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(escaped, 'gi');
+      const pattern = wholeWord ? `\\b${escaped}\\b` : escaped;
+      const re = new RegExp(pattern, 'gi');
       let m;
       while((m = re.exec(md))){
         const loc = toLineCol(m.index);
@@ -60,8 +68,18 @@ const LintUI = (() => {
     }
 
     // Extra stop terms
-    for(const term of cfg.extraStopTerms){
-      const re = new RegExp(term, 'gi');
+    for(const t of cfg.extraStopTerms){
+      let term, wholeWord = true;
+      if(typeof t === 'string'){
+        term = t;
+      } else if(t){
+        term = t.term;
+        if(t.wholeWord === false) wholeWord = false;
+      }
+      if(!term) continue;
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = wholeWord ? `\\b${escaped}\\b` : escaped;
+      const re = new RegExp(pattern, 'gi');
       let m;
       while((m = re.exec(md))){
         const loc = toLineCol(m.index);
