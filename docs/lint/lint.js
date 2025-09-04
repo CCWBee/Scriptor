@@ -2,8 +2,59 @@
    User-facing name: "Check" */
 
 const LintUI = (() => {
+  function normalizeText(container){
+    if(container && (container.nodeName === 'TEXTAREA' || container.nodeName === 'INPUT')){
+      const text = container.value || '';
+      return { text, map: [] };
+    }
+
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_ALL, null);
+    const map = [];
+    let text = '';
+    let offset = 0;
+    let seenText = false;
+    let pendingNL = false;
+
+    function isBlock(el){
+      if(el.nodeType !== 1) return false;
+      const disp = window.getComputedStyle(el).display;
+      return disp === 'block' || disp === 'flex' || disp === 'grid' || disp === 'list-item' || disp === 'table';
+    }
+
+    while(walker.nextNode()){
+      const node = walker.currentNode;
+      if(node.nodeType === Node.TEXT_NODE){
+        if(pendingNL && seenText){ text += '\n'; offset++; }
+        pendingNL = false;
+        const start = offset;
+        const content = node.textContent;
+        text += content;
+        offset += content.length;
+        map.push({ node, start, end: offset });
+        if(content.length) seenText = true;
+      } else if(node.nodeName === 'BR'){
+        if(seenText){ text += '\n'; offset++; }
+        pendingNL = false;
+      } else if(isBlock(node)){
+        pendingNL = true;
+      }
+    }
+    return { text, map };
+  }
+
+  function buildLineIndex(text){
+    const idx = [0];
+    for(let i = 0; i < text.length; i++){
+      if(text[i] === '\n') idx.push(i + 1);
+    }
+    return idx;
+  }
+
   function run(opts = {}){
-    const md = (opts.getMarkdown ? opts.getMarkdown() : "") || "";
+    const container = opts.container || document.body;
+    const norm = normalizeText(container);
+    const md = norm.text;
+    const lineIdx = buildLineIndex(md);
     const cfg = Object.assign({
       sentenceWordLimit: 40,
       bannedPhrases: {},
@@ -11,8 +62,15 @@ const LintUI = (() => {
     }, opts.config || {});
 
     function toLineCol(idx){
-      const lines = md.slice(0, idx).split('\n');
-      return { line: lines.length, column: lines[lines.length - 1].length + 1 };
+      let lo = 0, hi = lineIdx.length - 1;
+      while (lo <= hi){
+        const mid = (lo + hi) >> 1;
+        if(lineIdx[mid] <= idx) lo = mid + 1;
+        else hi = mid - 1;
+      }
+      const line = hi + 1;
+      const column = idx - lineIdx[hi] + 1;
+      return { line, column };
     }
 
     const issues = [];
@@ -96,7 +154,7 @@ const LintUI = (() => {
     }
 
     renderPanel(issues, opts);
-    highlight(opts.container || document.body, issues);
+    highlight(container, issues, norm.map);
   }
 
   function renderPanel(issues, opts){
@@ -140,8 +198,8 @@ const LintUI = (() => {
     document.body.appendChild(panel);
   }
 
-  function highlight(container, issues){
-    if(!container) return;
+  function highlight(container, issues, map){
+    if(!container || !map) return;
 
     // Remove existing highlights
     container.querySelectorAll('.lint-underline').forEach(el => {
@@ -150,37 +208,7 @@ const LintUI = (() => {
       parent.normalize();
     });
 
-    // Build a mapping of absolute offsets to text nodes, inserting synthetic
-    // "\n" offsets whenever we cross block-level boundaries or <br> elements.
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_ALL, null);
-    const map = [];
-    let offset = 0;
-    let seenText = false;
-    let pendingNL = false;
-
-    function isBlock(el){
-      if(el.nodeType !== 1) return false;
-      const disp = window.getComputedStyle(el).display;
-      return disp === 'block' || disp === 'flex' || disp === 'grid' || disp === 'list-item' || disp === 'table';
-    }
-
-    while(walker.nextNode()){
-      const node = walker.currentNode;
-      if(node.nodeType === Node.TEXT_NODE){
-        if(pendingNL && seenText) offset++;
-        pendingNL = false;
-        map.push({ node, start: offset, end: offset + node.textContent.length });
-        offset += node.textContent.length;
-        if(node.textContent.length) seenText = true;
-      } else if(node.nodeName === 'BR'){
-        if(seenText) offset++;
-        pendingNL = false;
-      } else if(isBlock(node)){
-        pendingNL = true;
-      }
-    }
-
-    // Highlight each issue using the mapping to resolve ranges
+    // Highlight each issue using the provided mapping
     issues.forEach((iss, i) => {
       const startEntry = map.find(m => iss.from >= m.start && iss.from < m.end);
       const endEntry = map.find(m => iss.to > m.start && iss.to <= m.end) || startEntry;
