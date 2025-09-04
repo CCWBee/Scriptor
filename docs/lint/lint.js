@@ -111,12 +111,15 @@ const LintUI = (() => {
     tip.id = 'lint-tip';
     document.body.appendChild(tip);
 
+    const icons = { error: '⛔', warn: '⚠️', info: 'ℹ️' };
+
     issues.forEach((iss, i) => {
       const item = document.createElement('div');
       item.className = 'lint-item';
       item.dataset.issue = i;
       const loc = `Line ${iss.line}${iss.column ? ':' + iss.column : ''}`;
-      item.innerHTML = `<span class="lint-tag tag-${iss.type}">${iss.type}</span>${escapeHtml(iss.message)}<div class="loc">${loc}</div>`;
+      const icon = icons[iss.type] || '';
+      item.innerHTML = `<span class="lint-tag tag-${iss.type}"><span class="lint-icon">${icon}</span>${iss.type}</span>${escapeHtml(iss.message)}<div class="loc">${loc}</div>`;
       item.addEventListener('click', () => {
         if(typeof opts.jumpTo === 'function') opts.jumpTo(iss.from, iss.to);
         activateIssue(i);
