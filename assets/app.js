@@ -263,6 +263,8 @@
     if (fmText) mdOut = `---\n${fmText}\n---\n\n` + mdOut;
     return mdOut;
   }
+  // expose for external scripts like the linter
+  window.getCurrentMarkdown = getCurrentMarkdown;
 
   function saveDraft(mdText) {
     try { localStorage.setItem(DRAFT_KEY, mdText); } catch (_) {}

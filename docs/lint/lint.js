@@ -41,7 +41,9 @@ const LintUI = (() => {
 
     // Banned phrases
     for(const [phrase, hint] of Object.entries(cfg.bannedPhrases)){
-      const re = new RegExp(phrase, 'gi');
+      // Escape special regex characters so phrases are matched literally
+      const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'gi');
       let m;
       while((m = re.exec(md))){
         const loc = toLineCol(m.index);
