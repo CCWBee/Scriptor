@@ -1,4 +1,5 @@
-/* Lightweight Markdown linter with side panel UI */
+/* Lightweight Markdown linter with side panel UI
+   User-facing name: "Check" */
 
 const LintUI = (() => {
   function run(opts = {}){
@@ -83,7 +84,7 @@ const LintUI = (() => {
 
     const panel = document.createElement('div');
     panel.id = 'lint-panel';
-    panel.innerHTML = `<header><h3>Lint results (${issues.length})</h3><button id="lint-close">×</button></header><div id="lint-list"></div>`;
+    panel.innerHTML = `<header><h3>Check results (${issues.length})</h3><button id="lint-close">×</button></header><div id="lint-list"></div>`;
     const list = panel.querySelector('#lint-list');
 
     const tip = document.createElement('div');

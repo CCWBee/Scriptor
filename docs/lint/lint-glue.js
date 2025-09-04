@@ -1,9 +1,10 @@
-/* glue code: wire the linter to your page, no build step needed */
+/* glue code: wire the text checker to your page, no build step needed
+   User-facing name: "Check text" */
 
 /* Scriptor IDs */
 const MD_INPUT   = document.querySelector("#source");   // raw markdown source
 const PREVIEW_EL = document.querySelector("#editor");   // rendered editor
-const BTN_CHECK  = document.querySelector("#btnCheck"); // toolbar button
+const BTN_CHECK  = document.querySelector("#btnCheck"); // toolbar button for "Check text"
 
 function getMarkdown(){
   if(MD_INPUT) return MD_INPUT.value;
@@ -17,7 +18,7 @@ function jumpTo(from, to){
   MD_INPUT.scrollTop = MD_INPUT.scrollHeight * (from / MD_INPUT.value.length);
 }
 
-function runLint(){
+function runCheck(){
   LintUI.run({
     getMarkdown,
     container: PREVIEW_EL || document.body,
@@ -36,13 +37,13 @@ function runLint(){
 }
 
 if(BTN_CHECK){
-  BTN_CHECK.addEventListener("click", runLint);
+  BTN_CHECK.addEventListener("click", runCheck);
 }
 
 if(MD_INPUT){
   let t = null;
   MD_INPUT.addEventListener("input", () => {
     clearTimeout(t);
-    t = setTimeout(runLint, 1000);
+    t = setTimeout(runCheck, 1000);
   });
 }
