@@ -22,11 +22,11 @@
 .tag-info  { background: var(--accent); }
 
 /* highlight marks in preview */
-.lint-underline { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.lint-error { text-decoration-color: var(--warn); }
-.lint-warn  { text-decoration-color: var(--accent-2); }
-.lint-info  { text-decoration-color: var(--accent); }
-.lint-underline.active { background: var(--accent); color: var(--surface); }
+.lint-underline { position: relative; }
+.lint-error { background: color-mix(in srgb, var(--warn) 25%, transparent); }
+.lint-warn  { background: color-mix(in srgb, var(--accent-2) 25%, transparent); }
+.lint-info  { box-shadow: inset 0 -2px var(--accent); }
+.lint-underline.active { background: var(--accent); color: var(--surface); box-shadow: none; }
 
 /* tooltip */
 #lint-tip {
