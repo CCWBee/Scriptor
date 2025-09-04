@@ -272,8 +272,11 @@
   }
 
   function updateLineNumbers() {
-    const text = mode === 'source' ? (srcTA.value || '') : (editor.innerText || '');
-    const lines = text.split(/\n/).length;
+    // Use Markdown representation to determine line count so the gutter
+    // matches the actual document structure. innerText collapses multiple
+    // blank lines and results in an incorrect count for complex content.
+    const text = mode === 'source' ? (srcTA.value || '') : getCurrentMarkdown();
+    const lines = text.split(/\r?\n/).length;
     lineGutter.innerHTML = '';
     for (let i = 1; i <= lines; i++) {
       const div = document.createElement('div');
