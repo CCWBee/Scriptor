@@ -143,8 +143,11 @@
   <!-- Main editor area -->
   <main id="main">
     <section id="dropZone" class="surface" aria-label="Editor area">
-      <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true"></div>
-      <textarea id="source" class="source" aria-label="Markdown source" spellcheck="false"></textarea>
+      <div id="editorWrap" class="editor-wrap">
+        <div id="lineGutter" class="line-gutter"></div>
+        <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true"></div>
+        <textarea id="source" class="source" aria-label="Markdown source" spellcheck="false"></textarea>
+      </div>
     </section>
     <div id="statusBar"></div>
   </main>
@@ -164,6 +167,7 @@
       <li><kbd>Ctrl</kbd> + <kbd>/</kbd> Advanced mode</li>
       <li><kbd>Ctrl</kbd> + <kbd>D</kbd> Dark mode</li>
       <li><kbd>Ctrl</kbd> + <kbd>S</kbd> Export (Markdown)</li>
+      <li><kbd>Ctrl</kbd> + <kbd>L</kbd> Toggle line numbers</li>
     </ul>
   </aside>
 
