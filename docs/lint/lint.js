@@ -9,6 +9,11 @@ const LintUI = (() => {
       extraStopTerms: []
     }, opts.config || {});
 
+    function toLineCol(idx){
+      const lines = md.slice(0, idx).split('\n');
+      return { line: lines.length, column: lines[lines.length - 1].length + 1 };
+    }
+
     const issues = [];
 
     // Check for long sentences
@@ -19,11 +24,14 @@ const LintUI = (() => {
       if(words.length > cfg.sentenceWordLimit){
         const start = md.indexOf(s, pos);
         const end = start + s.length;
+        const loc = toLineCol(start);
         issues.push({
           type: 'warn',
           message: `Sentence longer than ${cfg.sentenceWordLimit} words (${words.length})`,
           from: start,
           to: end,
+          line: loc.line,
+          column: loc.column,
           text: s
         });
       }
@@ -35,11 +43,14 @@ const LintUI = (() => {
       const re = new RegExp(phrase, 'gi');
       let m;
       while((m = re.exec(md))){
+        const loc = toLineCol(m.index);
         issues.push({
           type: 'error',
           message: `Avoid "${phrase}" (${hint})`,
           from: m.index,
           to: m.index + m[0].length,
+          line: loc.line,
+          column: loc.column,
           text: m[0]
         });
       }
@@ -50,11 +61,14 @@ const LintUI = (() => {
       const re = new RegExp(term, 'gi');
       let m;
       while((m = re.exec(md))){
+        const loc = toLineCol(m.index);
         issues.push({
           type: 'info',
           message: `Contains stop term "${term}"`,
           from: m.index,
           to: m.index + m[0].length,
+          line: loc.line,
+          column: loc.column,
           text: m[0]
         });
       }
@@ -80,7 +94,8 @@ const LintUI = (() => {
       const item = document.createElement('div');
       item.className = 'lint-item';
       item.dataset.issue = i;
-      item.innerHTML = `<span class="lint-tag tag-${iss.type}">${iss.type}</span>${escapeHtml(iss.message)}<div class="loc">${iss.from}-${iss.to}</div>`;
+      const loc = `Line ${iss.line}${iss.column ? ':' + iss.column : ''}`;
+      item.innerHTML = `<span class="lint-tag tag-${iss.type}">${iss.type}</span>${escapeHtml(iss.message)}<div class="loc">${loc}</div>`;
       item.addEventListener('click', () => {
         if(typeof opts.jumpTo === 'function') opts.jumpTo(iss.from, iss.to);
         activateIssue(i);

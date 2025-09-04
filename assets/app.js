@@ -8,6 +8,8 @@
   // code can refer to them without repeatedly querying the DOM.
   const editor = $('#editor');
   const srcTA = $('#source');
+  const editorWrap = $('#editorWrap');
+  const lineGutter = $('#lineGutter');
   const fileInput = $('#fileInput');
   const imgInput = $('#imgInput');
   const dropZone = $('#dropZone');
@@ -267,12 +269,24 @@
     dirty = mdText !== lastSavedMd;
   }
 
+  function updateLineNumbers() {
+    const text = mode === 'source' ? (srcTA.value || '') : (editor.innerText || '');
+    const lines = text.split(/\n/).length;
+    lineGutter.innerHTML = '';
+    for (let i = 1; i <= lines; i++) {
+      const div = document.createElement('div');
+      div.textContent = i;
+      lineGutter.appendChild(div);
+    }
+  }
+
   function handleInput() {
     const mdText = getCurrentMarkdown();
     saveDraft(mdText);
     const words = mdText.trim().split(/\s+/).filter(Boolean).length;
     const chars = mdText.length;
     statusBar.textContent = `${words} words • ${chars} chars`;
+    if (editorWrap.classList.contains('show-line-numbers')) updateLineNumbers();
   }
 
   const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TD','TH']);
@@ -624,6 +638,7 @@
       mode = 'wysiwyg';
     }
     updateChartButtonState();
+    if (editorWrap.classList.contains('show-line-numbers')) updateLineNumbers();
   }
 
   function updateChartButtonState() {
@@ -927,6 +942,7 @@
     else if (['1','2','3','4'].includes(k)){ e.preventDefault(); applyHeading(+k); }
     else if (k === '/'){ e.preventDefault(); toggleSource(); }
     else if (k === 'd'){ e.preventDefault(); toggleTheme(); }
+    else if (k === 'l'){ e.preventDefault(); editorWrap.classList.toggle('show-line-numbers'); if (editorWrap.classList.contains('show-line-numbers')) updateLineNumbers(); }
     else if (k === 's'){ e.preventDefault(); exportDocument(exportMenu.value || 'md'); }
   });
 

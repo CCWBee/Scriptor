@@ -198,6 +198,12 @@ body{
 
 /* Surface and editors */
 .surface{max-width:1100px; margin:1rem auto; padding:0 1rem}
+.editor-wrap{display:grid; grid-template-columns:auto 1fr}
+.line-gutter{display:none; padding:1.25rem .5rem; border:1px solid var(--edge); border-right:none; border-radius:.75rem 0 0 .75rem; background:var(--surface); text-align:right; font:.8rem/1.6 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; color:var(--muted); user-select:none}
+.line-gutter div{padding:0 .25rem}
+.editor-wrap .editor,.editor-wrap .source{grid-column:2}
+.editor-wrap.show-line-numbers .line-gutter{display:block}
+.editor-wrap.show-line-numbers .editor,.editor-wrap.show-line-numbers .source{border-left:none; border-top-left-radius:0; border-bottom-left-radius:0}
 .editor{
   min-height:60vh; padding:1.25rem 1.5rem; border:1px solid var(--edge); border-radius:.75rem;
   background:var(--surface);
