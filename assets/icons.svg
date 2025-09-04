@@ -43,4 +43,10 @@
   <symbol id="check" viewBox="0 0 24 24">
     <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/>
   </symbol>
+  <symbol id="frontmatter" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M4 4h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z"/>
+  </symbol>
+  <symbol id="check-circle" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </symbol>
 </svg>
