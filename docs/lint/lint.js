@@ -143,38 +143,57 @@ const LintUI = (() => {
   function highlight(container, issues){
     if(!container) return;
 
+    // Remove existing highlights
     container.querySelectorAll('.lint-underline').forEach(el => {
       const parent = el.parentNode;
       parent.replaceChild(document.createTextNode(el.textContent), el);
       parent.normalize();
     });
 
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
-    const nodes = [];
-    while(walker.nextNode()) nodes.push(walker.currentNode);
+    // Build a mapping of absolute offsets to text nodes, inserting synthetic
+    // "\n" offsets whenever we cross block-level boundaries or <br> elements.
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_ALL, null);
+    const map = [];
+    let offset = 0;
+    let seenText = false;
+    let pendingNL = false;
 
-    issues.forEach((iss, i) => {
-      let start = iss.from, end = iss.to, count = 0;
-      for(const node of nodes){
-        const len = node.textContent.length;
-        if(count + len < start){
-          count += len;
-          continue;
-        }
-        const s = Math.max(0, start - count);
-        const e = Math.min(len, end - count);
-        if(s >= len) break;
-        const range = document.createRange();
-        range.setStart(node, s);
-        range.setEnd(node, e);
-        const span = document.createElement('span');
-        span.className = `lint-underline lint-${iss.type}`;
-        span.dataset.issue = i;
-        span.addEventListener('click', () => activateIssue(i));
-        span.addEventListener('mouseenter', () => activateIssue(i));
-        range.surroundContents(span);
-        break;
+    function isBlock(el){
+      if(el.nodeType !== 1) return false;
+      const disp = window.getComputedStyle(el).display;
+      return disp === 'block' || disp === 'flex' || disp === 'grid' || disp === 'list-item' || disp === 'table';
+    }
+
+    while(walker.nextNode()){
+      const node = walker.currentNode;
+      if(node.nodeType === Node.TEXT_NODE){
+        if(pendingNL && seenText) offset++;
+        pendingNL = false;
+        map.push({ node, start: offset, end: offset + node.textContent.length });
+        offset += node.textContent.length;
+        if(node.textContent.length) seenText = true;
+      } else if(node.nodeName === 'BR'){
+        if(seenText) offset++;
+        pendingNL = false;
+      } else if(isBlock(node)){
+        pendingNL = true;
       }
+    }
+
+    // Highlight each issue using the mapping to resolve ranges
+    issues.forEach((iss, i) => {
+      const startEntry = map.find(m => iss.from >= m.start && iss.from < m.end);
+      const endEntry = map.find(m => iss.to > m.start && iss.to <= m.end) || startEntry;
+      if(!startEntry || !endEntry) return;
+      const range = document.createRange();
+      range.setStart(startEntry.node, iss.from - startEntry.start);
+      range.setEnd(endEntry.node, iss.to - endEntry.start);
+      const span = document.createElement('span');
+      span.className = `lint-underline lint-${iss.type}`;
+      span.dataset.issue = i;
+      span.addEventListener('click', () => activateIssue(i));
+      span.addEventListener('mouseenter', () => activateIssue(i));
+      range.surroundContents(span);
     });
   }
 
