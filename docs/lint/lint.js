@@ -52,6 +52,7 @@ const LintUI = (() => {
 
   function run(opts = {}){
     const container = opts.container || document.body;
+    clearHighlights(container);
     const norm = normalizeText(container);
     const md = norm.text;
     const lineIdx = buildLineIndex(md);
@@ -154,7 +155,7 @@ const LintUI = (() => {
     }
 
     renderPanel(issues, opts);
-    highlight(container, issues, norm.map);
+    highlight(container, issues);
   }
 
   function renderPanel(issues, opts){
@@ -198,17 +199,12 @@ const LintUI = (() => {
     document.body.appendChild(panel);
   }
 
-  function highlight(container, issues, map){
-    if(!container || !map) return;
+  function highlight(container, issues){
+    if(!container || !issues) return;
 
-    // Remove existing highlights
-    container.querySelectorAll('.lint-underline').forEach(el => {
-      const parent = el.parentNode;
-      parent.replaceChild(document.createTextNode(el.textContent), el);
-      parent.normalize();
-    });
+    issues.sort((a, b) => a.from - b.from);
+    let map = normalizeText(container).map;
 
-    // Highlight each issue using the provided mapping
     issues.forEach((iss, i) => {
       const startEntry = map.find(m => iss.from >= m.start && iss.from < m.end);
       const endEntry = map.find(m => iss.to > m.start && iss.to <= m.end) || startEntry;
@@ -222,6 +218,16 @@ const LintUI = (() => {
       span.addEventListener('click', () => activateIssue(i));
       span.addEventListener('mouseenter', () => activateIssue(i));
       range.surroundContents(span);
+      map = normalizeText(container).map;
+    });
+  }
+
+  function clearHighlights(container){
+    if(!container) return;
+    container.querySelectorAll('.lint-underline').forEach(el => {
+      const parent = el.parentNode;
+      parent.replaceChild(document.createTextNode(el.textContent), el);
+      parent.normalize();
     });
   }
 
