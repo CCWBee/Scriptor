@@ -22,11 +22,26 @@
 .tag-info  { background: var(--accent); }
 
 /* highlight marks in preview */
-.lint-underline { position: relative; }
-.lint-error { background: color-mix(in srgb, var(--warn) 25%, transparent); }
-.lint-warn  { background: color-mix(in srgb, var(--accent-2) 25%, transparent); }
-.lint-info  { background: color-mix(in srgb, var(--accent) 25%, transparent); }
-.lint-underline.active { background: var(--accent); color: var(--surface); box-shadow: none; }
+.lint-underline {
+  position: relative;
+  --lint-color: var(--accent);
+  background-image: linear-gradient(var(--lint-color), var(--lint-color));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 0.2em;
+  padding: 0 2px 2px;
+  margin: 0 -2px;
+  border-radius: 2px;
+  box-decoration-break: clone;
+}
+.lint-error { --lint-color: var(--warn); }
+.lint-warn  { --lint-color: var(--accent-2); }
+.lint-info  { --lint-color: var(--accent); }
+.lint-underline.active {
+  background-color: var(--accent);
+  color: var(--surface);
+  box-shadow: none;
+}
 
 /* tooltip */
 #lint-tip {
