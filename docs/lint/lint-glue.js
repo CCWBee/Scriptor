@@ -7,7 +7,9 @@ const PREVIEW_EL = document.querySelector("#editor");   // rendered editor
 const BTN_CHECK  = document.querySelector("#btnCheck"); // toolbar button for "Check text"
 
 function getMarkdown(){
-  if(MD_INPUT) return MD_INPUT.value;
+  if (MD_INPUT && MD_INPUT.value.trim()) return MD_INPUT.value;
+  if (window.getCurrentMarkdown) return window.getCurrentMarkdown();
+  if (PREVIEW_EL) return PREVIEW_EL.innerText || "";
   return document.body.innerText || "";
 }
 
