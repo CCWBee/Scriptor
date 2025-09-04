@@ -6,13 +6,6 @@ const MD_INPUT   = document.querySelector("#source");   // raw markdown source
 const PREVIEW_EL = document.querySelector("#editor");   // rendered editor
 const BTN_CHECK  = document.querySelector("#btnCheck"); // toolbar button for "Check text"
 
-function getMarkdown(){
-  if (MD_INPUT && MD_INPUT.value.trim()) return MD_INPUT.value;
-  if (window.getCurrentMarkdown) return window.getCurrentMarkdown();
-  if (PREVIEW_EL) return PREVIEW_EL.innerText || "";
-  return document.body.innerText || "";
-}
-
 function jumpTo(from, to){
   if(!MD_INPUT) return;
   MD_INPUT.focus();
@@ -21,9 +14,25 @@ function jumpTo(from, to){
 }
 
 function runCheck(){
+  let md = "";
+  let container = document.body;
+
+  if(MD_INPUT && MD_INPUT.value.trim()){
+    md = MD_INPUT.value;
+    container = MD_INPUT;
+  } else if(window.getCurrentMarkdown){
+    md = window.getCurrentMarkdown() || "";
+    container = PREVIEW_EL || document.body;
+  } else if(PREVIEW_EL){
+    md = PREVIEW_EL.innerText || "";
+    container = PREVIEW_EL;
+  } else {
+    md = document.body.innerText || "";
+  }
+
   LintUI.run({
-    getMarkdown,
-    container: PREVIEW_EL || document.body,
+    getMarkdown: () => md,
+    container,
     jumpTo,
     config: {
       sentenceWordLimit: 60,
