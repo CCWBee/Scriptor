@@ -19,3 +19,7 @@ python server.py
 ```
 
 The server accepts `POST /api/convert` with JSON `{ markdown, format }` and streams the converted file back using Pandoc. The frontend checks this endpoint at startup and only enables PDF, DOCX, and HTML exports when it responds.
+
+## Outline numbering
+
+Lines that begin with a dotted number sequence such as `1.2.3 ` are treated as an outline. Press **Enter** to insert a new line with the last segment incremented. Use **Tab** to deepen the outline (appending `.1`) and **Shift+Tab** to move back up a level. The caret remains after the inserted prefix so you can continue typing immediately.
