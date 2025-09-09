@@ -318,3 +318,14 @@ table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
 @media (min-width:900px){
   body:not(.shortcuts-collapsed) #main{margin-right:220px}
 }
+
+/* Diff styling */
+.diff-wrap{
+  margin:1rem 0;
+  padding:.5rem 1rem;
+  border:1px solid var(--edge);
+  border-radius:.5rem;
+  background:var(--surface);
+}
+.diff-add{background:var(--accent-2)}
+.diff-del{background:var(--warn); text-decoration:line-through}
