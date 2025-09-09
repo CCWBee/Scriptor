@@ -158,10 +158,12 @@
     return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   }
 
-  function renderDiff(oldText, newText) {
+  // Render an HTML diff where `originalText` is the baseline and `updatedText`
+  // represents the new editor content.
+  function renderDiff(originalText, updatedText) {
     if (!window.diff_match_patch) return '';
     const dmp = new diff_match_patch();
-    const diffs = dmp.diff_main(oldText || '', newText || '');
+    const diffs = dmp.diff_main(originalText || '', updatedText || '');
     dmp.diff_cleanupSemantic(diffs);
     return diffs.map(([op, data]) => {
       const text = escapeHtml(data);
@@ -287,11 +289,12 @@
   // expose for external scripts like the linter
   window.getCurrentMarkdown = getCurrentMarkdown;
 
-  function saveDraft(mdText) {
-    try { localStorage.setItem(DRAFT_KEY, mdText); } catch (_) {}
-    dirty = mdText !== lastSavedMd;
+  function saveDraft(editorText) {
+    try { localStorage.setItem(DRAFT_KEY, editorText); } catch (_) {}
+    dirty = editorText !== lastSavedMd;
     if (dirty) {
-      window.diffHtml = renderDiff(lastSavedMd, mdText);
+      const originalFileText = lastSavedMd;
+      window.diffHtml = renderDiff(originalFileText, editorText);
     }
   }
 
@@ -575,7 +578,8 @@
     if (!f) return;
     try {
       const txt = await f.text();
-      showDiff(getCurrentMarkdown(), txt);
+      // First argument is the original file contents, second is the editor text
+      showDiff(txt, getCurrentMarkdown());
     } catch(err) {
       console.error(err);
       toast('Failed to read diff file', 'warn');
@@ -584,8 +588,8 @@
     }
   });
 
-  function showDiff(orig, other) {
-    const diffs = diffLines(orig, other);
+  function showDiff(originalText, editorText) {
+    const diffs = diffLines(originalText, editorText);
     const html = diffs.map(part => {
       const esc = escapeHtml(part.line);
       if (part.type === 'add') return `<div class="added">+ ${esc}</div>`;
@@ -595,9 +599,9 @@
     displayDiff(html);
   }
 
-  function diffLines(a, b) {
-    const aL = a.split(/\r?\n/);
-    const bL = b.split(/\r?\n/);
+  function diffLines(originalText, updatedText) {
+    const aL = originalText.split(/\r?\n/);
+    const bL = updatedText.split(/\r?\n/);
     const m = aL.length, n = bL.length;
     const dp = Array.from({length: m + 1}, () => Array(n + 1).fill(0));
     for (let i = m - 1; i >= 0; i--) {
