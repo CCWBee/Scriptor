@@ -593,8 +593,13 @@
     if (!f) return;
     try {
       const txt = await f.text();
-      // First argument is the original file contents, second is the editor text
-      showDiff(txt, getCurrentMarkdown());
+      let wrap = document.querySelector('.diff-wrap');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.className = 'diff-wrap';
+        editorWrap.insertAdjacentElement('afterend', wrap);
+      }
+      wrap.innerHTML = renderDiff(txt, getCurrentMarkdown());
     } catch(err) {
       console.error(err);
       toast('Failed to read diff file', 'warn');
@@ -602,63 +607,6 @@
       diffInput.value = '';
     }
   });
-
-  function showDiff(originalText, editorText) {
-    const diffs = diffLines(originalText, editorText);
-    const html = diffs.map(part => {
-      const esc = escapeHtml(part.line);
-      if (part.type === 'add') return `<div class="added">+ ${esc}</div>`;
-      if (part.type === 'del') return `<div class="removed">- ${esc}</div>`;
-      return `<div>${esc}</div>`;
-    }).join('\n');
-    displayDiff(html);
-  }
-
-  function diffLines(originalText, updatedText) {
-    const aL = originalText.split(/\r?\n/);
-    const bL = updatedText.split(/\r?\n/);
-    const m = aL.length, n = bL.length;
-    const dp = Array.from({length: m + 1}, () => Array(n + 1).fill(0));
-    for (let i = m - 1; i >= 0; i--) {
-      for (let j = n - 1; j >= 0; j--) {
-        if (aL[i] === bL[j]) dp[i][j] = dp[i + 1][j + 1] + 1;
-        else dp[i][j] = Math.max(dp[i + 1][j], dp[i][j + 1]);
-      }
-    }
-    const out = [];
-    let i = 0, j = 0;
-    while (i < m && j < n) {
-      if (aL[i] === bL[j]) { out.push({type:'ctx', line:aL[i++]}); j++; }
-      else if (dp[i + 1][j] >= dp[i][j + 1]) out.push({type:'del', line:aL[i++]});
-      else out.push({type:'add', line:bL[j++]});
-    }
-    while (i < m) out.push({type:'del', line:aL[i++]});
-    while (j < n) out.push({type:'add', line:bL[j++]});
-    return out;
-  }
-
-  function escapeHtml(str) {
-    const map = {'&':'&amp;','<':'&lt;','>':'&gt;'};
-    return str.replace(/[&<>]/g, ch => map[ch]);
-  }
-
-  function displayDiff(html) {
-    let overlay = document.getElementById('diffOverlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'diffOverlay';
-      const close = document.createElement('button');
-      close.textContent = '×';
-      close.className = 'close';
-      close.addEventListener('click', () => overlay.remove());
-      overlay.appendChild(close);
-      const pre = document.createElement('pre');
-      overlay.appendChild(pre);
-      document.body.appendChild(overlay);
-    }
-    const pre = overlay.querySelector('pre');
-    pre.innerHTML = html;
-  }
 
   // Drag and drop
   ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, e => {
