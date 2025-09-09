@@ -155,6 +155,7 @@
   let scrollPos = 0;
   let diffMode = false;
   let storedEditorHTML = '';
+  let diffBaseline = '';
 
   function escapeHtml(str) {
     return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
@@ -576,15 +577,12 @@
   // Track changes / diff
   btnDiff.addEventListener('click', () => {
     if (!diffMode) {
-      storedEditorHTML = editor.innerHTML;
-      editor.innerHTML = renderDiff(lastSavedMd, getCurrentMarkdown());
-      editor.contentEditable = 'false';
-      diffMode = true;
-      btnDiff.setAttribute('aria-pressed', 'true');
+      diffInput.click();
     } else {
       editor.innerHTML = storedEditorHTML;
       editor.contentEditable = 'true';
       diffMode = false;
+      diffBaseline = '';
       btnDiff.setAttribute('aria-pressed', 'false');
     }
   });
@@ -593,13 +591,12 @@
     if (!f) return;
     try {
       const txt = await f.text();
-      let wrap = document.querySelector('.diff-wrap');
-      if (!wrap) {
-        wrap = document.createElement('div');
-        wrap.className = 'diff-wrap';
-        editorWrap.insertAdjacentElement('afterend', wrap);
-      }
-      wrap.innerHTML = renderDiff(txt, getCurrentMarkdown());
+      diffBaseline = txt;
+      storedEditorHTML = editor.innerHTML;
+      editor.innerHTML = renderDiff(diffBaseline, getCurrentMarkdown());
+      editor.contentEditable = 'false';
+      diffMode = true;
+      btnDiff.setAttribute('aria-pressed', 'true');
     } catch(err) {
       console.error(err);
       toast('Failed to read diff file', 'warn');
