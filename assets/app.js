@@ -973,7 +973,7 @@
             const segs = pm[1].split('.');
             const last = parseInt(segs.pop(), 10) + 1;
             segs.push(String(last));
-            const prefix = segs.join('.') + ' ';
+            const prefix = segs.join('.');
             const sel = window.getSelection();
             const range = document.createRange();
             range.selectNodeContents(parent);
@@ -982,7 +982,14 @@
             sel.addRange(range);
             block.remove();
             document.execCommand('insertParagraph');
-            document.execCommand('insertText', false, prefix);
+            const sel2 = window.getSelection();
+            if (sel2.rangeCount) {
+              const r2 = sel2.getRangeAt(0);
+              r2.collapse(true);
+              sel2.removeAllRanges();
+              sel2.addRange(r2);
+            }
+            document.execCommand('insertText', false, prefix + ' ');
             handleInput();
             return;
           }
@@ -990,9 +997,16 @@
       }
       const segments = match[1].split('.').map(n => parseInt(n, 10));
       segments[segments.length - 1]++;
-      const prefix = segments.join('.') + ' ';
+      const prefix = segments.join('.');
       document.execCommand('insertParagraph');
-      document.execCommand('insertText', false, prefix);
+      const sel = window.getSelection();
+      if (sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      document.execCommand('insertText', false, prefix + ' ');
       handleInput();
     } else if (e.key === 'Tab') {
       if (e.shiftKey) {
