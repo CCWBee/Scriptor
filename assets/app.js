@@ -949,6 +949,58 @@
     else if (k === 's'){ e.preventDefault(); exportDocument(exportMenu.value || 'md'); }
   });
 
+  editor.addEventListener('keydown', (e) => {
+    if (mode !== 'wysiwyg') return;
+    if (e.key !== 'Enter' && e.key !== 'Tab') return;
+
+    const rng = getSelectionRange();
+    if (!rng || !rng.collapsed) return;
+    const block = findBlockAncestor(rng.startContainer);
+    if (!block) return;
+
+    const first = block.firstChild;
+    const text = block.textContent;
+    const match = text.match(/^(\d+(?:\.\d+)*)\s/);
+    if (!match) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const segments = match[1].split('.').map(n => parseInt(n, 10));
+      segments[segments.length - 1]++;
+      const prefix = segments.join('.') + ' ';
+      document.execCommand('insertParagraph');
+      document.execCommand('insertText', false, prefix);
+      handleInput();
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const segments = match[1].split('.').map(n => parseInt(n, 10));
+      if (e.shiftKey) {
+        if (segments.length > 1) segments.pop(); else return;
+      } else {
+        segments.push(1);
+      }
+      const prefix = segments.join('.') + ' ';
+      if (first && first.nodeType === 3) {
+        const content = first.textContent;
+        if (content.startsWith(match[0])) {
+          first.textContent = prefix + content.slice(match[0].length);
+        } else {
+          first.textContent = prefix + content;
+        }
+      } else {
+        block.insertBefore(document.createTextNode(prefix), first);
+      }
+      const sel = window.getSelection();
+      const range = document.createRange();
+      const node = block.firstChild;
+      range.setStart(node, prefix.length);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      handleInput();
+    }
+  });
+
   // Basic startup
   editor.addEventListener('input', handleInput);
   srcTA.addEventListener('input', handleInput);
