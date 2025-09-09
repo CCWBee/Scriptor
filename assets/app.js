@@ -166,12 +166,30 @@
     dmp.diff_cleanupSemantic(diffs);
     return diffs.map(([op, data]) => {
       const rendered = data ? diffMd.render(data) : '';
-      let html = DOMPurify.sanitize(rendered, { SAFE_FOR_XML: false });
-      if (!html && data && /^<!--[\s\S]*?-->$/.test(data.trim())) {
-        html = data;
+      const fragment = DOMPurify.sanitize(rendered, {
+        SAFE_FOR_XML: false,
+        RETURN_DOM_FRAGMENT: true
+      });
+      const cls = op === 1 ? 'diff-add' : op === -1 ? 'diff-del' : '';
+      if (cls) {
+        Array.from(fragment.childNodes).forEach(node => {
+          if (node.nodeType === 1) {
+            node.classList.add(cls);
+          } else if (node.textContent.trim()) {
+            const span = document.createElement('span');
+            span.className = cls;
+            span.textContent = node.textContent;
+            fragment.replaceChild(span, node);
+          }
+        });
       }
-      if (op === 1) return `<span class="diff-add">${html}</span>`;
-      if (op === -1) return `<span class="diff-del">${html}</span>`;
+      let html = DOMPurify.sanitize(fragment, {
+        SAFE_FOR_XML: false,
+        RETURN_DOM_FRAGMENT: false
+      });
+      if (!html && data && /^<!--[\s\S]*?-->$/.test(data.trim())) {
+        html = cls ? `<span class="${cls}">${data}</span>` : data;
+      }
       return html;
     }).join('');
   }
