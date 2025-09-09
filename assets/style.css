@@ -329,29 +329,3 @@ table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
 }
 .diff-add{background:var(--accent-2);}
 .diff-del{background:var(--warn); text-decoration:line-through;}
-
-/* Diff overlay */
-#diffOverlay{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  background:var(--surface);
-  color:var(--fg);
-  padding:1rem;
-  overflow:auto;
-  z-index:50;
-}
-#diffOverlay pre{white-space:pre-wrap; margin:0;}
-#diffOverlay .close{
-  position:absolute;
-  top:.5rem;
-  right:.5rem;
-  border:none;
-  background:#fff0;
-  font-size:1.5rem;
-  cursor:pointer;
-}
-#diffOverlay .added{background:rgba(16,185,129,.2);}
-#diffOverlay .removed{background:rgba(185,28,28,.2); text-decoration:line-through;}
