@@ -153,6 +153,8 @@
   let lastSavedMd = '';
   let dirty = false; // whether there are unsaved changes
   let scrollPos = 0;
+  let diffMode = false;
+  let storedEditorHTML = '';
 
   function escapeHtml(str) {
     return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
@@ -572,7 +574,20 @@
   });
 
   // Track changes / diff
-  btnDiff.addEventListener('click', () => diffInput.click());
+  btnDiff.addEventListener('click', () => {
+    if (!diffMode) {
+      storedEditorHTML = editor.innerHTML;
+      editor.innerHTML = renderDiff(lastSavedMd, getCurrentMarkdown());
+      editor.contentEditable = 'false';
+      diffMode = true;
+      btnDiff.setAttribute('aria-pressed', 'true');
+    } else {
+      editor.innerHTML = storedEditorHTML;
+      editor.contentEditable = 'true';
+      diffMode = false;
+      btnDiff.setAttribute('aria-pressed', 'false');
+    }
+  });
   diffInput.addEventListener('change', async (e) => {
     const f = e.target.files[0];
     if (!f) return;
