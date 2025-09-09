@@ -157,10 +157,6 @@
   let storedEditorHTML = '';
   let baselineText = '';
 
-  function escapeHtml(str) {
-    return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  }
-
   // Render an HTML diff where `baselineText` is the original content and
   // `editedText` represents the new editor content.
   function renderDiff(baselineText, editedText) {
@@ -169,10 +165,10 @@
     const diffs = dmp.diff_main(baselineText || '', editedText || '');
     dmp.diff_cleanupSemantic(diffs);
     return diffs.map(([op, data]) => {
-      const text = escapeHtml(data);
-      if (op === 1) return `<span class="diff-add">${text}</span>`;
-      if (op === -1) return `<span class="diff-del">${text}</span>`;
-      return text;
+      const html = DOMPurify.sanitize(md.renderInline(data || ''));
+      if (op === 1) return `<span class="diff-add">${html}</span>`;
+      if (op === -1) return `<span class="diff-del">${html}</span>`;
+      return html;
     }).join('');
   }
 
