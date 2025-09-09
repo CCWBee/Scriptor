@@ -295,10 +295,6 @@
   function saveDraft(editorText) {
     try { localStorage.setItem(DRAFT_KEY, editorText); } catch (_) {}
     dirty = editorText !== lastSavedMd;
-    if (dirty) {
-      const originalFileText = lastSavedMd;
-      window.diffHtml = renderDiff(originalFileText, editorText);
-    }
   }
 
   function updateLineNumbers() {
@@ -574,29 +570,43 @@
     }
   });
 
+  function activateDiff(baseline) {
+    if (diffMode) deactivateDiff();
+    diffBaseline = baseline;
+    storedEditorHTML = editor.innerHTML;
+    editor.innerHTML = renderDiff(diffBaseline, getCurrentMarkdown());
+    editor.contentEditable = 'false';
+    diffMode = true;
+    btnDiff.setAttribute('aria-pressed', 'true');
+  }
+
+  function deactivateDiff() {
+    if (!diffMode) return;
+    editor.innerHTML = storedEditorHTML;
+    editor.contentEditable = 'true';
+    diffMode = false;
+    diffBaseline = '';
+    storedEditorHTML = '';
+    btnDiff.setAttribute('aria-pressed', 'false');
+  }
+
   // Track changes / diff
-  btnDiff.addEventListener('click', () => {
-    if (!diffMode) {
+  btnDiff.addEventListener('click', (e) => {
+    if (diffMode) {
+      deactivateDiff();
+    } else if (e.shiftKey || !dirty) {
       diffInput.click();
     } else {
-      editor.innerHTML = storedEditorHTML;
-      editor.contentEditable = 'true';
-      diffMode = false;
-      diffBaseline = '';
-      btnDiff.setAttribute('aria-pressed', 'false');
+      activateDiff(lastSavedMd);
     }
   });
+
   diffInput.addEventListener('change', async (e) => {
     const f = e.target.files[0];
     if (!f) return;
     try {
       const txt = await f.text();
-      diffBaseline = txt;
-      storedEditorHTML = editor.innerHTML;
-      editor.innerHTML = renderDiff(diffBaseline, getCurrentMarkdown());
-      editor.contentEditable = 'false';
-      diffMode = true;
-      btnDiff.setAttribute('aria-pressed', 'true');
+      activateDiff(txt);
     } catch(err) {
       console.error(err);
       toast('Failed to read diff file', 'warn');
