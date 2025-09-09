@@ -23,3 +23,7 @@ The server accepts `POST /api/convert` with JSON `{ markdown, format }` and stre
 ## Outline numbering
 
 Lines that begin with a dotted number sequence such as `1.2.3 ` are treated as an outline. Press **Enter** to insert a new line with the last segment incremented. Use **Tab** to deepen the outline (appending `.1`) and **Shift+Tab** to move back up a level. The caret remains after the inserted prefix so you can continue typing immediately.
+
+## Diff styling
+
+When comparing versions, deletions are wrapped with the `.diff-del` class and insertions with `.diff-add`.

@@ -155,18 +155,18 @@
   let scrollPos = 0;
   let diffMode = false;
   let storedEditorHTML = '';
-  let diffBaseline = '';
+  let baselineText = '';
 
   function escapeHtml(str) {
     return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   }
 
-  // Render an HTML diff where `originalText` is the baseline and `updatedText`
-  // represents the new editor content.
-  function renderDiff(originalText, updatedText) {
+  // Render an HTML diff where `baselineText` is the original content and
+  // `editedText` represents the new editor content.
+  function renderDiff(baselineText, editedText) {
     if (!window.diff_match_patch) return '';
     const dmp = new diff_match_patch();
-    const diffs = dmp.diff_main(originalText || '', updatedText || '');
+    const diffs = dmp.diff_main(baselineText || '', editedText || '');
     dmp.diff_cleanupSemantic(diffs);
     return diffs.map(([op, data]) => {
       const text = escapeHtml(data);
@@ -570,11 +570,11 @@
     }
   });
 
-  function activateDiff(baseline) {
+  function activateDiff(baselineContent) {
     if (diffMode) deactivateDiff();
-    diffBaseline = baseline;
+    baselineText = baselineContent;
     storedEditorHTML = editor.innerHTML;
-    editor.innerHTML = renderDiff(diffBaseline, getCurrentMarkdown());
+    editor.innerHTML = renderDiff(baselineText, getCurrentMarkdown());
     editor.contentEditable = 'false';
     diffMode = true;
     btnDiff.setAttribute('aria-pressed', 'true');
@@ -585,7 +585,7 @@
     editor.innerHTML = storedEditorHTML;
     editor.contentEditable = 'true';
     diffMode = false;
-    diffBaseline = '';
+    baselineText = '';
     storedEditorHTML = '';
     btnDiff.setAttribute('aria-pressed', 'false');
   }
