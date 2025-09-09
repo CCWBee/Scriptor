@@ -972,43 +972,54 @@
       document.execCommand('insertText', false, prefix);
       handleInput();
     } else if (e.key === 'Tab') {
-      e.preventDefault();
-      let segments = match[1].split('.').map(n => parseInt(n, 10));
-      const onlyNumber = text.trim() === match[1];
       if (e.shiftKey) {
-        if (segments.length > 1) segments.pop(); else return;
-      } else {
-        if (onlyNumber && block.previousElementSibling) {
-          const prevMatch = block.previousElementSibling.textContent.match(/^(\d+(?:\.\d+)*)\s/);
-          if (prevMatch) {
-            const prevSegments = prevMatch[1].split('.').map(n => parseInt(n, 10));
-            segments = prevSegments.concat(1);
+        e.preventDefault();
+        const segments = match[1].split('.');
+        if (segments.length <= 1) return;
+        segments.pop();
+        const prefix = segments.join('.') + ' ';
+        if (first && first.nodeType === 3) {
+          const content = first.textContent;
+          if (content.startsWith(match[0])) {
+            first.textContent = prefix + content.slice(match[0].length);
           } else {
-            segments.push(1);
+            first.textContent = prefix + content;
           }
         } else {
-          segments.push(1);
+          block.insertBefore(document.createTextNode(prefix), first);
         }
-      }
-      const prefix = segments.join('.') + ' ';
-      if (first && first.nodeType === 3) {
-        const content = first.textContent;
-        if (content.startsWith(match[0])) {
-          first.textContent = prefix + content.slice(match[0].length);
+        const sel = window.getSelection();
+        const range = document.createRange();
+        const node = block.firstChild;
+        range.setStart(node, prefix.length);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        handleInput();
+      } else if (/^\d+(?:\.\d+)*\s?$/.test(text)) {
+        e.preventDefault();
+        const segments = match[1].split('.');
+        segments.push('1');
+        const prefix = segments.join('.') + ' ';
+        if (first && first.nodeType === 3) {
+          const content = first.textContent;
+          if (content.startsWith(match[0])) {
+            first.textContent = prefix + content.slice(match[0].length);
+          } else {
+            first.textContent = prefix + content;
+          }
         } else {
-          first.textContent = prefix + content;
+          block.insertBefore(document.createTextNode(prefix), first);
         }
-      } else {
-        block.insertBefore(document.createTextNode(prefix), first);
+        const sel = window.getSelection();
+        const range = document.createRange();
+        const node = block.firstChild;
+        range.setStart(node, prefix.length);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        handleInput();
       }
-      const sel = window.getSelection();
-      const range = document.createRange();
-      const node = block.firstChild;
-      range.setStart(node, prefix.length);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      handleInput();
     }
   });
 
