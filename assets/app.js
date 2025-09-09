@@ -960,7 +960,7 @@
 
     const first = block.firstChild;
     const text = block.textContent;
-    const match = text.match(/^(\d+(?:\.\d+)*)\s/);
+    const match = text.match(/^(\d+(?:\.\d+)*)(?:\s|$)/);
     if (!match) return;
 
     if (e.key === 'Enter') {
