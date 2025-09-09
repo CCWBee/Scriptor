@@ -106,8 +106,12 @@
       <span class="spacer" aria-hidden="true"></span>
 
       <!-- File operations and export menu -->
+      <input id="diffInput" type="file" accept=".md,text/markdown,text/plain" hidden>
       <button id="btnLoad" class="btn" data-tip="Open .md file" aria-label="Open">
         <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#file"/></svg><span>Open</span>
+      </button>
+      <button id="btnDiff" class="btn" data-tip="Track changes" aria-label="Track changes">
+        <svg class="ico" aria-hidden="true"><use href="assets/icons.svg#code"/></svg><span>Track</span>
       </button>
       <select id="exportMenu" class="btn" data-tip="Export document" aria-label="Export">
         <option value="" selected disabled>Export…</option>
