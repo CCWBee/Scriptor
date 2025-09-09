@@ -1020,20 +1020,14 @@
         sel.addRange(range);
         handleInput();
       } else if (/^\d+(?:\.\d+)*\s?$/.test(text)) {
-        e.preventDefault();
-        let prefix;
         const prev = block.previousElementSibling;
-        if (prev) {
-          const pm = prev.textContent.match(/^(\d+(?:\.\d+)*)/);
-          if (pm) {
-            prefix = pm[1] + '.1 ';
-          }
-        }
-        if (!prefix) {
-          const segments = match[1].split('.');
-          segments.push('1');
-          prefix = segments.join('.') + ' ';
-        }
+        if (!prev) return;
+        const pm = prev.textContent.match(/^(\d+(?:\.\d+)*)/);
+        if (!pm) return;
+        e.preventDefault();
+        const segments = pm[1].split('.');
+        segments.push('1');
+        const prefix = segments.join('.') + ' ';
         if (first && first.nodeType === 3) {
           const content = first.textContent;
           if (content.startsWith(match[0])) {
