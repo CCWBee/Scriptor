@@ -146,7 +146,7 @@
   // ---------------------------------------------------------------------------
   let mode = 'wysiwyg'; // 'wysiwyg' | 'source'
   let currentFileName = 'untitled.md';
-  let md, td; // markdown-it and turndown instances
+  let md, td, diffMd; // markdown-it and turndown instances
   let savedRange = null; // caret position when switching views
   let frontmatter = {}; // YAML frontmatter data
   const DRAFT_KEY = 'draft'; // localStorage key for unsaved work
@@ -165,7 +165,11 @@
     const diffs = dmp.diff_main(baselineText || '', editedText || '');
     dmp.diff_cleanupSemantic(diffs);
     return diffs.map(([op, data]) => {
-      const html = DOMPurify.sanitize(md.renderInline(data || ''));
+      const rendered = data ? diffMd.render(data) : '';
+      let html = DOMPurify.sanitize(rendered, { SAFE_FOR_XML: false });
+      if (!html && data && /^<!--[\s\S]*?-->$/.test(data.trim())) {
+        html = data;
+      }
       if (op === 1) return `<span class="diff-add">${html}</span>`;
       if (op === -1) return `<span class="diff-del">${html}</span>`;
       return html;
@@ -180,6 +184,12 @@
     }
     md = window.markdownit({
       html: false,
+      linkify: true,
+      breaks: false
+    }).enable(['table','strikethrough']);
+
+    diffMd = window.markdownit({
+      html: true,
       linkify: true,
       breaks: false
     }).enable(['table','strikethrough']);
