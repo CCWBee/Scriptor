@@ -319,6 +319,17 @@ table[contenteditable="false"] td[contenteditable="true"]{caret-color:auto}
   body:not(.shortcuts-collapsed) #main{margin-right:220px}
 }
 
+/* Diff display */
+.diff-wrap{
+  margin:1rem 0;
+  padding:.5rem;
+  border:1px solid var(--edge);
+  border-radius:.25rem;
+  background:var(--surface);
+}
+.diff-add{background:var(--accent-2);}
+.diff-del{background:var(--warn); text-decoration:line-through;}
+
 /* Diff overlay */
 #diffOverlay{
   position:fixed;
