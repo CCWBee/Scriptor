@@ -973,11 +973,22 @@
       handleInput();
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      const segments = match[1].split('.').map(n => parseInt(n, 10));
+      let segments = match[1].split('.').map(n => parseInt(n, 10));
+      const onlyNumber = text.trim() === match[1];
       if (e.shiftKey) {
         if (segments.length > 1) segments.pop(); else return;
       } else {
-        segments.push(1);
+        if (onlyNumber && block.previousElementSibling) {
+          const prevMatch = block.previousElementSibling.textContent.match(/^(\d+(?:\.\d+)*)\s/);
+          if (prevMatch) {
+            const prevSegments = prevMatch[1].split('.').map(n => parseInt(n, 10));
+            segments = prevSegments.concat(1);
+          } else {
+            segments.push(1);
+          }
+        } else {
+          segments.push(1);
+        }
       }
       const prefix = segments.join('.') + ' ';
       if (first && first.nodeType === 3) {
