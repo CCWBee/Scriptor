@@ -965,6 +965,29 @@
 
     if (e.key === 'Enter') {
       e.preventDefault();
+      if (text.trim() === match[1]) {
+        const parent = block.previousElementSibling;
+        if (parent) {
+          const pm = parent.textContent.match(/^(\d+(?:\.\d+)*)(?:\s|$)/);
+          if (pm) {
+            const segs = pm[1].split('.');
+            const last = parseInt(segs.pop(), 10) + 1;
+            segs.push(String(last));
+            const prefix = segs.join('.') + ' ';
+            const sel = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(parent);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            block.remove();
+            document.execCommand('insertParagraph');
+            document.execCommand('insertText', false, prefix);
+            handleInput();
+            return;
+          }
+        }
+      }
       const segments = match[1].split('.').map(n => parseInt(n, 10));
       segments[segments.length - 1]++;
       const prefix = segments.join('.') + ' ';
