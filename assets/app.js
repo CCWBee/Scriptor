@@ -152,6 +152,25 @@
   let dirty = false; // whether there are unsaved changes
   let scrollPos = 0;
 
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  }
+
+  function renderDiff(oldText, newText) {
+    if (!window.diff_match_patch) return '';
+    const dmp = new diff_match_patch();
+    const diffs = dmp.diff_main(oldText || '', newText || '');
+    dmp.diff_cleanupSemantic(diffs);
+    return diffs.map(([op, data]) => {
+      const text = escapeHtml(data);
+      if (op === 1) return `<span class="diff-add">${text}</span>`;
+      if (op === -1) return `<span class="diff-del">${text}</span>`;
+      return text;
+    }).join('');
+  }
+
+  window.renderDiff = renderDiff;
+
   try {
     if (!window.markdownit || !window.DOMPurify || !window.TurndownService || !window.turndownPluginGfm) {
       throw new Error('Missing required libraries');
@@ -269,6 +288,9 @@
   function saveDraft(mdText) {
     try { localStorage.setItem(DRAFT_KEY, mdText); } catch (_) {}
     dirty = mdText !== lastSavedMd;
+    if (dirty) {
+      window.diffHtml = renderDiff(lastSavedMd, mdText);
+    }
   }
 
   function updateLineNumbers() {
