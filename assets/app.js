@@ -997,8 +997,11 @@
         sel.addRange(range);
         handleInput();
       } else if (/^\d+(?:\.\d+)*\s?$/.test(text)) {
+        const prev = block.previousElementSibling;
+        const prevMatch = prev && prev.textContent.match(/^(\d+(?:\.\d+)*)(?:\s|$)/);
+        if (!prevMatch) return;
         e.preventDefault();
-        const segments = match[1].split('.');
+        const segments = prevMatch[1].split('.');
         segments.push('1');
         const prefix = segments.join('.') + ' ';
         if (first && first.nodeType === 3) {
